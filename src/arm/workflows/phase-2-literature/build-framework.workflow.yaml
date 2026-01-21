@@ -1,0 +1,138 @@
+workflow:
+  id: build-framework
+  name: Construção do Framework Teórico
+  version: "1.0.0"
+  module: arm
+  phase: 2
+  description: |
+    Workflow para construir o framework teórico-conceitual da pesquisa.
+    Integra teorias e conceitos em um modelo coerente que fundamenta
+    o estudo.
+  
+  lead_agent: theory-connector
+  supporting_agents:
+    - literature-curator
+    - synthesis-writer
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/references-analysis.yaml"
+      description: "Análise de referências"
+      required: false
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: map-theories
+      name: Mapear Teorias Relevantes
+      description: "Identificar teorias aplicáveis"
+      agent: theory-connector
+      action: map_theories
+      prompt: |
+        Identifique teorias relevantes para a pesquisa:
+        1. Quais teorias são usadas na área?
+        2. Quais se aplicam ao seu problema?
+        3. Quais são os autores principais de cada teoria?
+        4. Como cada teoria explica o fenômeno?
+      output:
+        - theories_map
+
+    - id: define-concepts
+      name: Definir Conceitos-Chave
+      description: "Esclarecer conceitos centrais"
+      agent: theory-connector
+      action: define_concepts
+      prompt: |
+        Para cada conceito central:
+        1. Apresente definições da literatura
+        2. Compare diferentes perspectivas
+        3. Escolha/construa definição operacional
+        4. Justifique a escolha
+      input:
+        - theories_map
+      output:
+        - concepts_definitions
+
+    - id: analyze-relations
+      name: Analisar Relações
+      description: "Mapear relações entre conceitos"
+      agent: theory-connector
+      action: analyze_relations
+      prompt: |
+        Identifique as relações entre conceitos:
+        1. Quais conceitos estão relacionados?
+        2. Qual é a natureza da relação? (causal, associativa, etc.)
+        3. O que a teoria diz sobre essa relação?
+        4. O que a evidência empírica mostra?
+      input:
+        - concepts_definitions
+      output:
+        - relations_map
+
+    - id: integrate-framework
+      name: Integrar Framework
+      description: "Construir modelo integrado"
+      agent: theory-connector
+      action: integrate_framework
+      prompt: |
+        Construa o framework integrando:
+        1. Teorias selecionadas
+        2. Conceitos definidos
+        3. Relações mapeadas
+        
+        Crie uma representação visual (descrição) do modelo.
+      input:
+        - theories_map
+        - concepts_definitions
+        - relations_map
+      output:
+        - integrated_framework
+
+    - id: derive-propositions
+      name: Derivar Proposições
+      description: "Extrair proposições do framework"
+      agent: theory-connector
+      action: derive_propositions
+      prompt: |
+        A partir do framework, derive proposições:
+        1. Que afirmações teóricas decorrem do modelo?
+        2. Que relações são esperadas?
+        3. Como isso se conecta às hipóteses (se houver)?
+      input:
+        - integrated_framework
+      output:
+        - propositions
+      optional: true
+
+    - id: document-framework
+      name: Documentar Framework
+      description: "Criar documentação formal"
+      agent: theory-connector
+      action: document_framework
+      input:
+        - integrated_framework
+        - propositions
+      output:
+        - framework_document
+
+  outputs:
+    - name: framework_document
+      path: "_adks/_docs/02-literature/theoretical-framework.md"
+      format: md
+    - name: framework_data
+      path: "_adks/_memory/theoretical-framework.yaml"
+      format: yaml
+
+  next_workflows:
+    - identify-gaps
+    - write-review
+    - design-method
+
+  tags:
+    - phase-2
+    - literature
+    - theory
+    - framework
+    - concepts

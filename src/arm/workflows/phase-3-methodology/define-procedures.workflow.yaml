@@ -1,0 +1,149 @@
+workflow:
+  id: define-procedures
+  name: Definição de Procedimentos de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 3
+  description: |
+    Workflow para detalhar os procedimentos de coleta e análise.
+    Transforma o design metodológico em passos concretos e
+    executáveis.
+  
+  lead_agent: procedure-designer
+  supporting_agents:
+    - method-architect
+    - data-strategist
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/method-design.yaml"
+      description: "Design metodológico"
+      required: true
+  
+  sharded: false
+  
+  steps:
+    - id: detail-participants
+      name: Detalhar Participantes/Amostra
+      description: "Especificar população e amostra"
+      agent: procedure-designer
+      action: detail_participants
+      prompt: |
+        Detalhe participantes/amostra:
+        1. Quem são os participantes? (ou qual é o corpus?)
+        2. Critérios de inclusão
+        3. Critérios de exclusão
+        4. Tamanho da amostra e justificativa
+        5. Estratégia de recrutamento/seleção
+      output:
+        - participants_details
+
+    - id: design-instruments
+      name: Desenhar Instrumentos
+      description: "Criar/adaptar instrumentos de coleta"
+      agent: procedure-designer
+      action: design_instruments
+      prompt: |
+        Para cada instrumento necessário:
+        1. Tipo de instrumento (questionário, roteiro, checklist, etc.)
+        2. Construtos/variáveis que mede
+        3. Estrutura do instrumento
+        4. Fonte (criado, adaptado, validado)
+        5. Procedimento de validação (se criado)
+      output:
+        - instruments_design
+
+    - id: define-collection-procedures
+      name: Definir Procedimentos de Coleta
+      description: "Detalhar como dados serão coletados"
+      agent: procedure-designer
+      action: define_collection
+      prompt: |
+        Detalhe os procedimentos de coleta:
+        1. Sequência de etapas
+        2. Quem coleta
+        3. Onde acontece
+        4. Quanto tempo leva
+        5. Como registrar os dados
+        6. Procedimentos de backup
+      input:
+        - instruments_design
+      output:
+        - collection_procedures
+
+    - id: define-analysis-procedures
+      name: Definir Procedimentos de Análise
+      description: "Detalhar como dados serão analisados"
+      agent: procedure-designer
+      action: define_analysis
+      prompt: |
+        Detalhe os procedimentos de análise:
+        1. Técnicas de análise para cada tipo de dado
+        2. Software/ferramentas a serem usados
+        3. Categorias de análise (se qualitativa)
+        4. Testes estatísticos (se quantitativa)
+        5. Procedimentos de validação da análise
+      output:
+        - analysis_procedures
+
+    - id: address-ethics
+      name: Abordar Questões Éticas
+      description: "Definir procedimentos éticos"
+      agent: procedure-designer
+      action: address_ethics
+      prompt: |
+        Defina procedimentos éticos:
+        1. Necessidade de aprovação em comitê de ética
+        2. Termo de consentimento
+        3. Garantia de anonimato/confidencialidade
+        4. Riscos e benefícios para participantes
+        5. Armazenamento seguro de dados
+      output:
+        - ethical_procedures
+
+    - id: create-timeline
+      name: Criar Cronograma
+      description: "Estabelecer cronograma de execução"
+      agent: procedure-designer
+      action: create_timeline
+      prompt: |
+        Crie cronograma detalhado:
+        1. Fases da coleta de dados
+        2. Duração estimada de cada fase
+        3. Marcos importantes
+        4. Buffers para imprevistos
+      output:
+        - execution_timeline
+
+    - id: document-procedures
+      name: Documentar Procedimentos
+      description: "Compilar documentação"
+      agent: procedure-designer
+      action: document_procedures
+      input:
+        - participants_details
+        - instruments_design
+        - collection_procedures
+        - analysis_procedures
+        - ethical_procedures
+        - execution_timeline
+      output:
+        - procedures_document
+
+  outputs:
+    - name: procedures_document
+      path: "_adks/_docs/03-methodology/procedures.md"
+      format: md
+    - name: procedures_data
+      path: "_adks/_memory/procedures.yaml"
+      format: yaml
+
+  next_workflows:
+    - data-strategy
+    - validate-method
+
+  tags:
+    - phase-3
+    - methodology
+    - procedures
+    - instruments
+    - ethics

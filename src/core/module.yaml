@@ -1,0 +1,74 @@
+module:
+  id: core
+  name: AD-KS Core
+  version: "1.0.0"
+  description: |
+    Módulo central do AD-KS que fornece orquestração, 
+    comandos globais e funcionalidades compartilhadas
+    entre todos os módulos do framework.
+  author: AD-KS Team
+  language: pt-br
+
+  # Equipes do módulo core
+  teams:
+    - id: orchestration
+      name: Orquestração
+      description: Gerenciamento e coordenação do framework
+      agents:
+        - adks-master
+      lead: adks-master
+
+  # Não há fases no core - fases são definidas nos módulos específicos
+  phases: []
+
+  # Diretórios
+  agents_dir: ./agents
+  workflows_dir: ./workflows
+  templates_dir: ./templates
+
+  # Sem dependências - core é a base
+  dependencies: []
+
+  # Configurações globais
+  config:
+    default_language: pt-br
+    supported_languages:
+      - pt-br
+      - en
+      - es
+    
+    # Comandos globais disponíveis em qualquer contexto
+    global_commands:
+      - trigger: "*help"
+        description: Mostra ajuda e comandos disponíveis
+      - trigger: "*workflow-init"
+        description: Inicia seleção de workflow
+      - trigger: "*status"
+        description: Mostra status do projeto
+      - trigger: "*list-agents"
+        description: Lista todos os agentes disponíveis
+      - trigger: "*list-workflows"
+        description: Lista todos os workflows disponíveis
+      - trigger: "*team"
+        description: Mostra/muda equipe atual
+
+    # Configurações de interação
+    interaction:
+      # Sempre perguntar antes de prosseguir
+      always_ask_before_proceeding: true
+      # Oferecer múltiplas opções de próximos passos
+      offer_next_steps: true
+      # Permitir modo automático
+      allow_automatic_mode: true
+      # Triggers para modo automático
+      automatic_mode_triggers:
+        - "modo automático"
+        - "continuar automaticamente"
+        - "automatic mode"
+        - "continue automatically"
+
+    # Configurações de memória
+    memory:
+      enabled: true
+      base_dir: _memory
+      sidecar_suffix: "-sidecar"

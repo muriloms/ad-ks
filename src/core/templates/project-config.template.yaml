@@ -1,0 +1,57 @@
+# AD-KS Project Configuration
+# Este arquivo configura o comportamento do AD-KS no seu projeto
+
+project:
+  name: "Meu Projeto de Pesquisa"
+  type: article  # article, dissertation, thesis, tcc, report
+  language: pt-br  # pt-br, en, es
+  
+  # Informações do pesquisador
+  researcher:
+    name: ""
+    email: ""
+    institution: ""
+    program: ""  # Se aplicável
+    
+  # Informações do orientador (se aplicável)
+  advisor:
+    name: ""
+    email: ""
+
+# Configuração de destino
+target:
+  venue: ""  # Nome do periódico, conferência ou programa
+  style: abnt  # abnt, apa, vancouver, ieee, chicago
+  deadline: ""  # YYYY-MM-DD
+  
+# Configuração do AD-KS
+adks:
+  # Modo de operação
+  mode: guided  # guided (sempre pergunta), auto (executa automaticamente)
+  
+  # Agentes ativos (deixe vazio para todos)
+  active_teams: []
+  # Exemplo: [team-ideation, team-writing]
+  
+  # Customizações de agentes
+  customizations_dir: "_adks/_customizations"
+  
+  # Memória
+  memory:
+    enabled: true
+    base_dir: "_adks/_memory"
+    
+  # Documentos gerados
+  docs:
+    base_dir: "_adks/_docs"
+    
+# Fases do projeto
+phases:
+  current: 1  # Fase atual (1-6)
+  completed: []  # Fases completadas
+  
+# Metadados (preenchido automaticamente)
+metadata:
+  created_at: ""
+  updated_at: ""
+  adks_version: ""

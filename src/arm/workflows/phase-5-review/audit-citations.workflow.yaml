@@ -1,0 +1,144 @@
+workflow:
+  id: audit-citations
+  name: Auditoria de Citações e Referências
+  version: "1.0.0"
+  module: arm
+  phase: 5
+  description: |
+    Workflow para auditar citações e referências do trabalho.
+    Verifica precisão, consistência e adequação das citações.
+  
+  lead_agent: citation-auditor
+  supporting_agents:
+    - reference-manager
+    - literature-curator
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/**/*.md"
+      description: "Documentos com citações"
+      required: false
+    - pattern: "_adks/_uploads/*.bib"
+      description: "Arquivo de referências"
+      required: false
+    - pattern: "_adks/_uploads/*.docx"
+      description: "Documento Word"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: collect-citations
+      name: Coletar Citações
+      description: "Extrair todas as citações do texto"
+      agent: citation-auditor
+      action: collect_citations
+      prompt: |
+        Colete todas as citações do documento:
+        1. Identifique citações diretas
+        2. Identifique citações indiretas
+        3. Note o formato usado
+        4. Liste autores e anos citados
+      output:
+        - citations_list
+        - citation_format
+
+    - id: cross-check-references
+      name: Verificar Referências
+      description: "Conferir citações vs lista de referências"
+      agent: citation-auditor
+      action: cross_check
+      prompt: |
+        Compare citações com lista de referências:
+        1. Todas as citações têm referência?
+        2. Todas as referências são citadas?
+        3. Anos e autores conferem?
+        4. Há duplicatas ou inconsistências?
+      input:
+        - citations_list
+      output:
+        - cross_check_results
+
+    - id: verify-accuracy
+      name: Verificar Precisão
+      description: "Conferir se citações são precisas"
+      agent: citation-auditor
+      action: verify_accuracy
+      prompt: |
+        Para citações selecionadas, verifique:
+        1. A citação reflete o que o autor disse?
+        2. O contexto está preservado?
+        3. Citações diretas são exatas?
+        4. Não há distorção do significado?
+      input:
+        - citations_list
+      output:
+        - accuracy_check
+      optional: true
+
+    - id: check-format
+      name: Verificar Formatação
+      description: "Conferir padrão de formatação"
+      agent: reference-manager
+      action: check_format
+      prompt: |
+        Verifique a formatação das citações:
+        1. Seguem o padrão escolhido (ABNT/APA/etc)?
+        2. São consistentes ao longo do texto?
+        3. Pontuação está correta?
+        4. Referências estão completas?
+      input:
+        - citations_list
+        - citation_format
+      output:
+        - format_check
+
+    - id: identify-issues
+      name: Identificar Problemas
+      description: "Consolidar problemas encontrados"
+      agent: citation-auditor
+      action: identify_issues
+      prompt: |
+        Consolide os problemas encontrados:
+        1. Citações sem referência
+        2. Referências não citadas
+        3. Erros de formatação
+        4. Possíveis imprecisões
+        5. Inconsistências
+      input:
+        - cross_check_results
+        - accuracy_check
+        - format_check
+      output:
+        - issues_list
+
+    - id: generate-report
+      name: Gerar Relatório
+      description: "Criar relatório de auditoria"
+      agent: citation-auditor
+      action: generate_report
+      input:
+        - citations_list
+        - cross_check_results
+        - format_check
+        - issues_list
+      output:
+        - audit_report
+
+  outputs:
+    - name: audit_report
+      path: "_adks/_docs/05-review/citation-audit.md"
+      format: md
+    - name: audit_data
+      path: "_adks/_memory/citation-audit.yaml"
+      format: yaml
+
+  next_workflows:
+    - detect-bias
+    - format-document
+
+  tags:
+    - phase-5
+    - review
+    - citations
+    - references
+    - audit

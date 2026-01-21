@@ -1,0 +1,182 @@
+workflow:
+  id: create-presentation
+  name: Criação de Apresentação
+  version: "1.0.0"
+  module: arm
+  phase: 6
+  description: |
+    Workflow para criar apresentação da pesquisa.
+    Usado para defesas, conferências, seminários e
+    outras apresentações orais.
+  
+  lead_agent: presentation-expert
+  supporting_agents:
+    - academic-writer
+    - structure-designer
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/**/*.md"
+      description: "Documentos do projeto"
+      required: false
+    - pattern: "_adks/_memory/*.yaml"
+      description: "Dados do projeto"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: define-context
+      name: Definir Contexto
+      description: "Entender contexto da apresentação"
+      agent: presentation-expert
+      action: define_context
+      prompt: |
+        Defina o contexto da apresentação:
+        1. Qual é a ocasião? (defesa, conferência, seminário)
+        2. Quanto tempo disponível?
+        3. Quem é a audiência?
+        4. Há requisitos específicos?
+        5. Haverá perguntas depois?
+      output:
+        - presentation_context
+        - time_limit
+        - audience_profile
+
+    - id: plan-structure
+      name: Planejar Estrutura
+      description: "Definir estrutura da apresentação"
+      agent: presentation-expert
+      action: plan_structure
+      prompt: |
+        Planeje a estrutura:
+        1. Defina seções principais
+        2. Aloque tempo para cada seção
+        3. Identifique pontos-chave
+        4. Planeje transições
+        5. Reserve tempo para conclusão
+      input:
+        - presentation_context
+        - time_limit
+      output:
+        - presentation_outline
+
+    - id: extract-key-points
+      name: Extrair Pontos-Chave
+      description: "Identificar conteúdo essencial"
+      agent: presentation-expert
+      action: extract_key_points
+      prompt: |
+        Extraia os pontos-chave do trabalho:
+        1. Problema/motivação principal
+        2. Pergunta de pesquisa
+        3. Metodologia (resumida)
+        4. Resultados principais
+        5. Contribuições/conclusões
+        
+        Lembre: menos é mais em apresentações.
+      input:
+        - presentation_outline
+      output:
+        - key_points
+
+    - id: design-slides
+      name: Desenhar Slides
+      description: "Criar conteúdo dos slides"
+      agent: presentation-expert
+      action: design_slides
+      prompt: |
+        Desenhe os slides:
+        1. Um ponto principal por slide
+        2. Título que comunica a mensagem
+        3. Pouco texto (máximo 6 bullets)
+        4. Elementos visuais quando possível
+        5. Notas do apresentador
+      input:
+        - presentation_outline
+        - key_points
+      output:
+        - slides_content
+
+    - id: prepare-visuals
+      name: Preparar Visuais
+      description: "Criar/adaptar elementos visuais"
+      agent: presentation-expert
+      action: prepare_visuals
+      prompt: |
+        Prepare elementos visuais:
+        1. Gráficos simplificados
+        2. Tabelas resumidas
+        3. Diagramas explicativos
+        4. Imagens relevantes
+        
+        Todos devem ser legíveis à distância.
+      input:
+        - slides_content
+      output:
+        - visual_elements
+
+    - id: add-speaker-notes
+      name: Adicionar Notas
+      description: "Criar notas do apresentador"
+      agent: presentation-expert
+      action: add_notes
+      prompt: |
+        Crie notas do apresentador:
+        1. Pontos a mencionar
+        2. Transições entre slides
+        3. Tempo estimado por slide
+        4. Lembretes importantes
+      input:
+        - slides_content
+      output:
+        - speaker_notes
+
+    - id: prepare-qa
+      name: Preparar Perguntas
+      description: "Antecipar perguntas da banca"
+      agent: presentation-expert
+      action: prepare_qa
+      prompt: |
+        Antecipe perguntas:
+        1. Perguntas sobre metodologia
+        2. Perguntas sobre limitações
+        3. Perguntas sobre contribuições
+        4. Perguntas desafiadoras
+        
+        Prepare respostas para cada uma.
+      input:
+        - presentation_context
+      output:
+        - qa_preparation
+      optional: true
+
+    - id: compile-presentation
+      name: Compilar Apresentação
+      description: "Gerar apresentação final"
+      agent: presentation-expert
+      action: compile_presentation
+      input:
+        - slides_content
+        - visual_elements
+        - speaker_notes
+        - qa_preparation
+      output:
+        - presentation_document
+
+  outputs:
+    - name: presentation_document
+      path: "_adks/_docs/06-final/presentation.md"
+      format: md
+    - name: presentation_data
+      path: "_adks/_memory/presentation.yaml"
+      format: yaml
+
+  next_workflows:
+    - final-checklist
+
+  tags:
+    - phase-6
+    - finalization
+    - presentation
+    - defense
+    - slides

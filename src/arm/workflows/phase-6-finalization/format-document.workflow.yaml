@@ -1,0 +1,162 @@
+workflow:
+  id: format-document
+  name: Formatação Final do Documento
+  version: "1.0.0"
+  module: arm
+  phase: 6
+  description: |
+    Workflow para formatação final do documento.
+    Aplica template do periódico/programa e prepara
+    documento para submissão.
+  
+  lead_agent: latex-specialist
+  supporting_agents:
+    - reference-manager
+    - structure-designer
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/04-writing/**/*.md"
+      description: "Seções do documento"
+      required: false
+    - pattern: "_adks/_uploads/*.tex"
+      description: "Documento LaTeX existente"
+      required: false
+    - pattern: "_adks/_uploads/*.docx"
+      description: "Documento Word existente"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: identify-requirements
+      name: Identificar Requisitos
+      description: "Entender requisitos de formatação"
+      agent: latex-specialist
+      action: identify_requirements
+      prompt: |
+        Identifique os requisitos de formatação:
+        1. Qual é o destino? (periódico, programa, conferência)
+        2. Há template específico?
+        3. Quais são as regras de formatação?
+        4. Limites de páginas/palavras?
+        5. Formato de figuras/tabelas?
+      output:
+        - format_requirements
+        - template_info
+
+    - id: setup-template
+      name: Configurar Template
+      description: "Preparar template do documento"
+      agent: latex-specialist
+      action: setup_template
+      prompt: |
+        Configure o template:
+        1. Carregue/crie template adequado
+        2. Configure margens, fontes, espaçamento
+        3. Configure cabeçalhos/rodapés
+        4. Prepare estrutura de seções
+      input:
+        - format_requirements
+        - template_info
+      output:
+        - template_setup
+
+    - id: format-text
+      name: Formatar Texto
+      description: "Aplicar formatação ao conteúdo"
+      agent: latex-specialist
+      action: format_text
+      prompt: |
+        Aplique formatação ao texto:
+        1. Títulos e subtítulos
+        2. Parágrafos e espaçamento
+        3. Listas e enumerações
+        4. Destaques e ênfases
+        5. Notas de rodapé
+      input:
+        - template_setup
+      output:
+        - formatted_text
+
+    - id: format-references
+      name: Formatar Referências
+      description: "Aplicar estilo às referências"
+      agent: reference-manager
+      action: format_references
+      prompt: |
+        Formate as referências:
+        1. Aplique estilo correto (ABNT/APA/etc)
+        2. Ordene conforme requisito
+        3. Verifique completude
+        4. Configure citações no texto
+      input:
+        - format_requirements
+      output:
+        - formatted_references
+
+    - id: format-figures-tables
+      name: Formatar Figuras e Tabelas
+      description: "Ajustar elementos visuais"
+      agent: latex-specialist
+      action: format_visuals
+      prompt: |
+        Formate figuras e tabelas:
+        1. Tamanho adequado
+        2. Legendas formatadas
+        3. Numeração correta
+        4. Posicionamento adequado
+        5. Qualidade de imagem
+      output:
+        - formatted_visuals
+
+    - id: compile-document
+      name: Compilar Documento
+      description: "Gerar documento final"
+      agent: latex-specialist
+      action: compile_document
+      prompt: |
+        Compile o documento:
+        1. Junte todas as partes
+        2. Gere PDF/documento final
+        3. Verifique paginação
+        4. Verifique referências cruzadas
+        5. Resolva warnings/erros
+      input:
+        - formatted_text
+        - formatted_references
+        - formatted_visuals
+      output:
+        - compiled_document
+
+    - id: final-check
+      name: Verificação Final
+      description: "Conferir documento compilado"
+      agent: latex-specialist
+      action: final_check
+      prompt: |
+        Faça verificação final:
+        1. Todas as páginas estão corretas?
+        2. Sumário está atualizado?
+        3. Referências cruzadas funcionam?
+        4. Não há texto cortado?
+        5. Atende limites de tamanho?
+      input:
+        - compiled_document
+      output:
+        - final_document
+
+  outputs:
+    - final_document
+    - source_files
+
+  next_workflows:
+    - create-presentation
+    - final-checklist
+    - prepare-submission
+
+  tags:
+    - phase-6
+    - finalization
+    - formatting
+    - latex
+    - document

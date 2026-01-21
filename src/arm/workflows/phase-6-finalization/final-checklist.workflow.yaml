@@ -1,0 +1,159 @@
+workflow:
+  id: final-checklist
+  name: Checklist Final de Qualidade
+  version: "1.0.0"
+  module: arm
+  phase: 6
+  description: |
+    Workflow de verificação final antes da submissão.
+    Garante que todos os elementos estão completos
+    e em conformidade.
+  
+  lead_agent: method-validator
+  supporting_agents:
+    - citation-auditor
+    - style-guardian
+    - structure-designer
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/06-final/*"
+      description: "Documentos finais"
+      required: false
+    - pattern: "_adks/_memory/*.yaml"
+      description: "Dados do projeto"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: check-structure
+      name: Verificar Estrutura
+      description: "Conferir completude da estrutura"
+      agent: structure-designer
+      action: check_structure
+      prompt: |
+        Verifique a estrutura do documento:
+        - [ ] Todas as seções obrigatórias presentes?
+        - [ ] Ordem das seções correta?
+        - [ ] Numeração de seções consistente?
+        - [ ] Sumário atualizado?
+        - [ ] Listas de figuras/tabelas (se requerido)?
+      output:
+        - structure_check
+
+    - id: check-content
+      name: Verificar Conteúdo
+      description: "Conferir completude do conteúdo"
+      agent: method-validator
+      action: check_content
+      prompt: |
+        Verifique o conteúdo:
+        - [ ] Introdução contextualiza adequadamente?
+        - [ ] Revisão cobre conceitos necessários?
+        - [ ] Metodologia está completa?
+        - [ ] Resultados respondem aos objetivos?
+        - [ ] Discussão interpreta os resultados?
+        - [ ] Conclusão sintetiza contribuições?
+        - [ ] Limitações estão declaradas?
+      output:
+        - content_check
+
+    - id: check-citations
+      name: Verificar Citações
+      description: "Conferir citações e referências"
+      agent: citation-auditor
+      action: check_citations
+      prompt: |
+        Verifique citações e referências:
+        - [ ] Todas citações têm referência?
+        - [ ] Todas referências são citadas?
+        - [ ] Formato consistente?
+        - [ ] Informações completas?
+        - [ ] Links/DOIs funcionam?
+      output:
+        - citations_check
+
+    - id: check-formatting
+      name: Verificar Formatação
+      description: "Conferir formatação"
+      agent: style-guardian
+      action: check_formatting
+      prompt: |
+        Verifique a formatação:
+        - [ ] Fonte e tamanho corretos?
+        - [ ] Margens conforme requisito?
+        - [ ] Espaçamento correto?
+        - [ ] Títulos formatados consistentemente?
+        - [ ] Figuras/tabelas bem posicionadas?
+        - [ ] Legendas presentes e corretas?
+      output:
+        - formatting_check
+
+    - id: check-language
+      name: Verificar Linguagem
+      description: "Conferir qualidade textual"
+      agent: style-guardian
+      action: check_language
+      prompt: |
+        Verifique a linguagem:
+        - [ ] Sem erros ortográficos?
+        - [ ] Sem erros gramaticais?
+        - [ ] Tom acadêmico consistente?
+        - [ ] Terminologia consistente?
+        - [ ] Clareza em todo o texto?
+      output:
+        - language_check
+
+    - id: check-requirements
+      name: Verificar Requisitos
+      description: "Conferir requisitos específicos"
+      agent: method-validator
+      action: check_requirements
+      prompt: |
+        Verifique requisitos do destino:
+        - [ ] Limite de páginas/palavras respeitado?
+        - [ ] Formato de arquivo correto?
+        - [ ] Elementos obrigatórios presentes?
+        - [ ] Anonimização (se blind review)?
+        - [ ] Declarações necessárias incluídas?
+      output:
+        - requirements_check
+
+    - id: generate-report
+      name: Gerar Relatório
+      description: "Consolidar verificações"
+      agent: method-validator
+      action: generate_report
+      prompt: |
+        Consolide as verificações:
+        1. Status geral (pronto/não pronto)
+        2. Itens pendentes
+        3. Riscos identificados
+        4. Recomendações finais
+      input:
+        - structure_check
+        - content_check
+        - citations_check
+        - formatting_check
+        - language_check
+        - requirements_check
+      output:
+        - final_report
+
+  outputs:
+    - name: final_report
+      path: "_adks/_docs/06-final/quality-checklist.md"
+      format: md
+    - name: checklist_data
+      path: "_adks/_memory/quality-checklist.yaml"
+      format: yaml
+
+  next_workflows:
+    - prepare-submission
+
+  tags:
+    - phase-6
+    - finalization
+    - checklist
+    - quality
+    - verification

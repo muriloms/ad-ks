@@ -1,0 +1,165 @@
+workflow:
+  id: validate-method
+  name: Validação da Metodologia
+  version: "1.0.0"
+  module: arm
+  phase: 3
+  description: |
+    Workflow para validar a metodologia proposta.
+    Verifica coerência, rigor e viabilidade do design
+    metodológico antes da execução.
+  
+  lead_agent: method-validator
+  supporting_agents:
+    - method-architect
+    - feasibility-expert
+    - logic-checker
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/method-design.yaml"
+      description: "Design metodológico"
+      required: true
+    - pattern: "_adks/_memory/procedures.yaml"
+      description: "Procedimentos definidos"
+      required: false
+    - pattern: "_adks/_memory/data-strategy.yaml"
+      description: "Estratégia de dados"
+      required: false
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: true
+  
+  sharded: false
+  
+  steps:
+    - id: check-alignment
+      name: Verificar Alinhamento
+      description: "Confirmar coerência pergunta-método"
+      agent: method-validator
+      action: check_alignment
+      prompt: |
+        Verifique o alinhamento:
+        1. O método permite responder a pergunta?
+        2. Os procedimentos são adequados aos objetivos?
+        3. As técnicas de análise são apropriadas?
+        4. Há coerência entre abordagem e instrumentos?
+      output:
+        - alignment_check
+
+    - id: assess-validity
+      name: Avaliar Validade
+      description: "Verificar validade do design"
+      agent: method-validator
+      action: assess_validity
+      prompt: |
+        Avalie a validade do design:
+        
+        **Validade Interna:**
+        - Controle de variáveis
+        - Ameaças à validade interna
+        
+        **Validade Externa:**
+        - Generalização dos resultados
+        - Limitações de contexto
+        
+        **Validade de Constructo:**
+        - Operacionalização adequada
+        - Instrumentos medem o que devem
+      output:
+        - validity_assessment
+
+    - id: identify-threats
+      name: Identificar Ameaças
+      description: "Mapear ameaças à validade"
+      agent: method-validator
+      action: identify_threats
+      prompt: |
+        Identifique ameaças à validade:
+        1. Quais são as ameaças possíveis?
+        2. Qual a probabilidade de cada uma?
+        3. Qual o impacto potencial?
+        4. Como podem ser mitigadas?
+      input:
+        - validity_assessment
+      output:
+        - threats_identified
+
+    - id: check-logic
+      name: Verificar Lógica
+      description: "Checar coerência lógica"
+      agent: logic-checker
+      action: check_method_logic
+      prompt: |
+        Verifique a lógica do método:
+        1. Os passos seguem sequência lógica?
+        2. Há premissas não justificadas?
+        3. As conclusões possíveis decorrem do método?
+        4. Há saltos lógicos?
+      output:
+        - logic_check
+      optional: true
+
+    - id: final-feasibility
+      name: Verificar Viabilidade Final
+      description: "Confirmar viabilidade de execução"
+      agent: feasibility-expert
+      action: final_feasibility
+      prompt: |
+        Faça verificação final de viabilidade:
+        1. Todos os recursos estão disponíveis?
+        2. O cronograma é realista?
+        3. Há riscos não mitigados?
+        4. Aprovações necessárias foram obtidas?
+      output:
+        - final_feasibility
+
+    - id: generate-recommendations
+      name: Gerar Recomendações
+      description: "Consolidar recomendações"
+      agent: method-validator
+      action: generate_recommendations
+      prompt: |
+        Gere recomendações finais:
+        1. Ajustes necessários antes de executar
+        2. Pontos de atenção durante execução
+        3. Mitigações a implementar
+        4. Documentação adicional necessária
+      input:
+        - alignment_check
+        - validity_assessment
+        - threats_identified
+        - final_feasibility
+      output:
+        - recommendations
+
+    - id: document-validation
+      name: Documentar Validação
+      description: "Criar relatório de validação"
+      agent: method-validator
+      action: document_validation
+      input:
+        - alignment_check
+        - validity_assessment
+        - threats_identified
+        - recommendations
+      output:
+        - validation_document
+
+  outputs:
+    - name: validation_document
+      path: "_adks/_docs/03-methodology/method-validation.md"
+      format: md
+    - name: validation_data
+      path: "_adks/_memory/method-validation.yaml"
+      format: yaml
+
+  next_workflows:
+    - write-section
+    - plan-structure
+
+  tags:
+    - phase-3
+    - methodology
+    - validation
+    - rigor
+    - quality

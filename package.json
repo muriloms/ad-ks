@@ -1,0 +1,72 @@
+{
+  "name": "ad-ks",
+  "version": "0.1.0-alpha.1",
+  "description": "Academic Development Knowledge System - Framework de agentes de IA para desenvolvimento de pesquisa científica",
+  "type": "module",
+  "main": "tools/cli/adks-cli.js",
+  "bin": {
+    "ad-ks": "tools/adks-npx-wrapper.js",
+    "adks": "tools/adks-npx-wrapper.js"
+  },
+  "scripts": {
+    "adks:install": "node tools/cli/adks-cli.js install",
+    "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run",
+    "test:watch": "node --experimental-vm-modules node_modules/vitest/vitest.mjs",
+    "validate": "node tools/scripts/validate-yaml.js",
+    "compile": "node tools/scripts/compile.js --verbose",
+    "compile:watch": "node tools/scripts/compile.js --verbose --watch",
+    "build": "npm run validate && npm run compile",
+    "lint": "echo 'Lint not configured yet'",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node tools/scripts/postinstall.js || true"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "academic",
+    "research",
+    "scientific-writing",
+    "methodology",
+    "latex",
+    "phd",
+    "thesis",
+    "paper",
+    "literature-review",
+    "cursor",
+    "claude-code",
+    "bmad"
+  ],
+  "author": "Murilo Montanini Segatto",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muriloms/fase-method.git"
+  },
+  "bugs": {
+    "url": "https://github.com/muriloms/fase-method/issues"
+  },
+  "homepage": "https://github.com/muriloms/fase-method#readme",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.3.7",
+    "ora": "^8.1.1",
+    "yaml": "^2.6.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8"
+  },
+  "files": [
+    "tools/",
+    "src/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
+}

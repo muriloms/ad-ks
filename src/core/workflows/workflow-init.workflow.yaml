@@ -1,0 +1,82 @@
+workflow:
+  id: workflow-init
+  name: Inicialização do AD-KS
+  version: "1.0.0"
+  module: core
+  description: |
+    Workflow de inicialização que apresenta as opções de início
+    e direciona o usuário para o workflow apropriado.
+  
+  lead_agent: adks-master
+  supporting_agents: []
+  
+  input_file_patterns:
+    - pattern: "_adks/_config/project-config.yaml"
+      description: "Configuração do projeto (se existir)"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: check-context
+      name: Verificar Contexto
+      description: "Verifica se existe projeto configurado e carrega contexto"
+      agent: adks-master
+      action: check_project_context
+      output:
+        - context_loaded
+        - project_exists
+
+    - id: show-options
+      name: Apresentar Opções
+      description: "Mostra as 8 opções de início para o usuário"
+      agent: adks-master
+      action: show_workflow_init_options
+      prompt: |
+        Apresente as 8 opções de início usando o template workflow_init_options.
+        Se já existe um projeto, destaque a opção "Continuar Projeto".
+      input:
+        - context_loaded
+      output:
+        - selected_option
+
+    - id: route-selection
+      name: Direcionar Seleção
+      description: "Direciona para o workflow ou agente apropriado"
+      agent: adks-master
+      action: route_to_selection
+      input:
+        - selected_option
+      output:
+        - target_workflow
+        - target_agent
+
+    - id: execute-handoff
+      name: Executar Transferência
+      description: "Transfere para o workflow ou agente selecionado"
+      agent: adks-master
+      action: execute_handoff
+      input:
+        - target_workflow
+        - target_agent
+        - context_loaded
+
+  outputs:
+    - name: workflow_selection
+      path: "_adks/_memory/last-workflow-selection.yaml"
+      format: yaml
+
+  next_workflows:
+    - new-research
+    - explore-idea
+    - continue-project
+    - analyze-references
+    - design-method
+    - write-section
+    - scientific-review
+    - improve-text
+
+  tags:
+    - core
+    - initialization
+    - navigation

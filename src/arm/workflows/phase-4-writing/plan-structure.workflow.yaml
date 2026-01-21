@@ -1,0 +1,157 @@
+workflow:
+  id: plan-structure
+  name: Planejamento da Estrutura do Artigo
+  version: "1.0.0"
+  module: arm
+  phase: 4
+  description: |
+    Workflow para planejar a estrutura completa do artigo/dissertação.
+    Define seções, subseções e o fluxo narrativo do documento.
+  
+  lead_agent: structure-designer
+  supporting_agents:
+    - academic-writer
+    - vision-synthesizer
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: false
+    - pattern: "_adks/_memory/objectives.yaml"
+      description: "Objetivos"
+      required: false
+    - pattern: "_adks/_memory/method-design.yaml"
+      description: "Design metodológico"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: identify-document-type
+      name: Identificar Tipo de Documento
+      description: "Determinar formato do documento"
+      agent: structure-designer
+      action: identify_type
+      prompt: |
+        Identifique o tipo de documento:
+        1. Artigo científico (qual periódico/conferência?)
+        2. Dissertação de mestrado
+        3. Tese de doutorado
+        4. TCC/Monografia
+        5. Relatório técnico
+        
+        Cada tipo tem estrutura específica.
+      output:
+        - document_type
+        - target_venue
+
+    - id: select-template
+      name: Selecionar Template
+      description: "Escolher estrutura base"
+      agent: structure-designer
+      action: select_template
+      prompt: |
+        Com base no tipo de documento:
+        1. Apresente estruturas típicas
+        2. Considere requisitos do periódico/programa
+        3. Sugira template adequado
+        4. Permita customização
+      input:
+        - document_type
+      output:
+        - base_template
+
+    - id: define-sections
+      name: Definir Seções
+      description: "Especificar seções do documento"
+      agent: structure-designer
+      action: define_sections
+      prompt: |
+        Defina as seções principais:
+        1. Lista de seções na ordem
+        2. Objetivo de cada seção
+        3. Conteúdo esperado
+        4. Tamanho estimado (páginas/palavras)
+      input:
+        - base_template
+      output:
+        - sections_list
+
+    - id: detail-subsections
+      name: Detalhar Subseções
+      description: "Criar outline detalhado"
+      agent: structure-designer
+      action: detail_subsections
+      prompt: |
+        Para cada seção principal:
+        1. Defina subseções
+        2. Indique pontos-chave de cada uma
+        3. Sugira ordem lógica
+        4. Identifique conexões entre seções
+      input:
+        - sections_list
+      output:
+        - detailed_outline
+
+    - id: plan-narrative-flow
+      name: Planejar Fluxo Narrativo
+      description: "Definir a história do documento"
+      agent: academic-writer
+      action: plan_narrative
+      prompt: |
+        Planeje o fluxo narrativo:
+        1. Qual é a "história" que o documento conta?
+        2. Como cada seção contribui para essa história?
+        3. Onde estão os pontos de virada/insights principais?
+        4. Como garantir que o leitor siga a lógica?
+      input:
+        - detailed_outline
+      output:
+        - narrative_plan
+      optional: true
+
+    - id: estimate-effort
+      name: Estimar Esforço
+      description: "Calcular tempo necessário"
+      agent: structure-designer
+      action: estimate_effort
+      prompt: |
+        Estime o esforço para cada seção:
+        1. Tempo estimado de escrita
+        2. Dependências (o que precisa estar pronto antes)
+        3. Ordem sugerida de escrita
+        4. Total estimado
+      input:
+        - detailed_outline
+      output:
+        - effort_estimate
+
+    - id: document-structure
+      name: Documentar Estrutura
+      description: "Criar documento de estrutura"
+      agent: structure-designer
+      action: document_structure
+      input:
+        - detailed_outline
+        - narrative_plan
+        - effort_estimate
+      output:
+        - structure_document
+
+  outputs:
+    - name: structure_document
+      path: "_adks/_docs/04-writing/document-structure.md"
+      format: md
+    - name: structure_data
+      path: "_adks/_memory/document-structure.yaml"
+      format: yaml
+
+  next_workflows:
+    - write-section
+
+  tags:
+    - phase-4
+    - writing
+    - structure
+    - outline
+    - planning

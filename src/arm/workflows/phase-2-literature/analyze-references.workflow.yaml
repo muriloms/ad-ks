@@ -1,0 +1,147 @@
+workflow:
+  id: analyze-references
+  name: Análise de Referências Bibliográficas
+  version: "1.0.0"
+  module: arm
+  phase: 2
+  description: |
+    Workflow para analisar e organizar referências bibliográficas.
+    Inclui estratégia de busca, avaliação de fontes e organização
+    temática da literatura.
+  
+  lead_agent: literature-curator
+  supporting_agents:
+    - theory-connector
+    - gap-identifier
+    - reference-manager
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: false
+    - pattern: "_adks/_memory/topic-definition.yaml"
+      description: "Definição do tópico"
+      required: false
+    - pattern: "_adks/_uploads/*.bib"
+      description: "Arquivos BibTeX com referências"
+      required: false
+    - pattern: "_adks/_uploads/*.pdf"
+      description: "PDFs de artigos"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: define-search-strategy
+      name: Definir Estratégia de Busca
+      description: "Planejar como buscar literatura"
+      agent: literature-curator
+      action: define_search_strategy
+      prompt: |
+        Defina a estratégia de busca:
+        1. Palavras-chave principais e sinônimos
+        2. Bases de dados relevantes para a área
+        3. Critérios de inclusão e exclusão
+        4. Período de cobertura
+        5. Tipos de publicação (artigos, livros, etc.)
+      output:
+        - search_strategy
+
+    - id: collect-references
+      name: Coletar Referências
+      description: "Orientar coleta de referências"
+      agent: literature-curator
+      action: guide_collection
+      prompt: |
+        Oriente o pesquisador na coleta:
+        1. Execute buscas nas bases definidas
+        2. Aplique critérios de inclusão/exclusão
+        3. Documente resultados por base
+        4. Importe referências para gerenciador
+        
+        Pergunte quantas referências foram encontradas.
+      input:
+        - search_strategy
+      output:
+        - collection_results
+
+    - id: evaluate-sources
+      name: Avaliar Fontes
+      description: "Avaliar qualidade e relevância"
+      agent: literature-curator
+      action: evaluate_sources
+      prompt: |
+        Para as referências coletadas:
+        1. Avalie relevância para a pesquisa
+        2. Verifique qualidade da fonte (periódico, citações)
+        3. Classifique por prioridade de leitura
+        4. Identifique fontes seminais/essenciais
+      input:
+        - collection_results
+      output:
+        - evaluated_sources
+        - priority_list
+
+    - id: organize-thematically
+      name: Organizar por Temas
+      description: "Categorizar literatura por temas"
+      agent: literature-curator
+      action: organize_themes
+      prompt: |
+        Organize as referências por temas:
+        1. Identifique temas/categorias principais
+        2. Classifique cada referência
+        3. Identifique conexões entre temas
+        4. Note lacunas em cada tema
+      input:
+        - evaluated_sources
+      output:
+        - thematic_organization
+
+    - id: identify-key-works
+      name: Identificar Obras-Chave
+      description: "Destacar trabalhos fundamentais"
+      agent: theory-connector
+      action: identify_key_works
+      prompt: |
+        Identifique os trabalhos mais importantes:
+        1. Obras seminais da área
+        2. Revisões de literatura relevantes
+        3. Trabalhos mais citados
+        4. Publicações mais recentes
+      input:
+        - thematic_organization
+      output:
+        - key_works
+      optional: true
+
+    - id: document-analysis
+      name: Documentar Análise
+      description: "Criar documentação da análise"
+      agent: literature-curator
+      action: document_analysis
+      input:
+        - search_strategy
+        - thematic_organization
+        - key_works
+      output:
+        - analysis_document
+
+  outputs:
+    - name: analysis_document
+      path: "_adks/_docs/02-literature/reference-analysis.md"
+      format: md
+    - name: references_data
+      path: "_adks/_memory/references-analysis.yaml"
+      format: yaml
+
+  next_workflows:
+    - build-framework
+    - identify-gaps
+    - write-review
+
+  tags:
+    - phase-2
+    - literature
+    - references
+    - search

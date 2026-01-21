@@ -1,0 +1,174 @@
+workflow:
+  id: detect-bias
+  name: Detecção de Vieses e Limitações
+  version: "1.0.0"
+  module: arm
+  phase: 5
+  description: |
+    Workflow para identificar vieses e limitações do trabalho.
+    Ajuda a reconhecer e documentar pontos fracos de forma
+    transparente e acadêmica.
+  
+  lead_agent: bias-detector
+  supporting_agents:
+    - method-validator
+    - logic-checker
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/method-design.yaml"
+      description: "Design metodológico"
+      required: false
+    - pattern: "_adks/_docs/**/*.md"
+      description: "Documentos do projeto"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: review-methodology
+      name: Revisar Metodologia
+      description: "Analisar metodologia quanto a vieses"
+      agent: bias-detector
+      action: review_methodology
+      prompt: |
+        Revise a metodologia quanto a vieses:
+        1. Viés de seleção na amostra?
+        2. Viés de medição nos instrumentos?
+        3. Viés do pesquisador na coleta/análise?
+        4. Viés de confirmação nas interpretações?
+      output:
+        - methodology_biases
+
+    - id: review-literature
+      name: Revisar Uso da Literatura
+      description: "Analisar vieses na revisão"
+      agent: bias-detector
+      action: review_literature
+      prompt: |
+        Revise o uso da literatura:
+        1. Seleção enviesada de fontes?
+        2. Fontes que contradizem foram ignoradas?
+        3. Interpretação tendenciosa de autores?
+        4. Viés de disponibilidade?
+      output:
+        - literature_biases
+
+    - id: review-interpretation
+      name: Revisar Interpretações
+      description: "Analisar vieses nas conclusões"
+      agent: bias-detector
+      action: review_interpretation
+      prompt: |
+        Revise as interpretações e conclusões:
+        1. Conclusões excedem as evidências?
+        2. Explicações alternativas foram consideradas?
+        3. Há generalização excessiva?
+        4. Vieses cognitivos nas interpretações?
+      output:
+        - interpretation_biases
+
+    - id: identify-limitations
+      name: Identificar Limitações
+      description: "Mapear limitações do estudo"
+      agent: bias-detector
+      action: identify_limitations
+      prompt: |
+        Identifique limitações:
+        1. Limitações metodológicas
+        2. Limitações de escopo
+        3. Limitações de generalização
+        4. Limitações de recursos/tempo
+        5. Limitações de acesso
+      input:
+        - methodology_biases
+      output:
+        - limitations_list
+
+    - id: assess-impact
+      name: Avaliar Impacto
+      description: "Determinar impacto dos vieses"
+      agent: bias-detector
+      action: assess_impact
+      prompt: |
+        Para cada viés/limitação:
+        1. Qual o impacto potencial nos resultados?
+        2. Compromete a validade?
+        3. Pode ser mitigado?
+        4. Como deve ser reportado?
+      input:
+        - methodology_biases
+        - literature_biases
+        - interpretation_biases
+        - limitations_list
+      output:
+        - impact_assessment
+
+    - id: suggest-mitigations
+      name: Sugerir Mitigações
+      description: "Propor formas de mitigar"
+      agent: bias-detector
+      action: suggest_mitigations
+      prompt: |
+        Para vieses ainda mitigáveis:
+        1. O que pode ser feito agora?
+        2. O que deveria ter sido feito?
+        3. Como reportar transparentemente?
+        4. Como pesquisas futuras podem evitar?
+      input:
+        - impact_assessment
+      output:
+        - mitigation_suggestions
+
+    - id: draft-limitations-section
+      name: Rascunhar Seção de Limitações
+      description: "Escrever texto para o artigo"
+      agent: bias-detector
+      action: draft_limitations
+      prompt: |
+        Redija texto para seção de limitações:
+        1. Reconheça limitações honestamente
+        2. Explique impacto potencial
+        3. Descreva mitigações adotadas
+        4. Sugira pesquisas futuras
+        
+        Tom: transparente, não defensivo.
+      input:
+        - limitations_list
+        - impact_assessment
+        - mitigation_suggestions
+      output:
+        - limitations_draft
+
+    - id: document-analysis
+      name: Documentar Análise
+      description: "Criar relatório completo"
+      agent: bias-detector
+      action: document_analysis
+      input:
+        - methodology_biases
+        - literature_biases
+        - interpretation_biases
+        - limitations_list
+        - impact_assessment
+        - limitations_draft
+      output:
+        - bias_report
+
+  outputs:
+    - name: bias_report
+      path: "_adks/_docs/05-review/bias-limitations.md"
+      format: md
+    - name: bias_data
+      path: "_adks/_memory/bias-limitations.yaml"
+      format: yaml
+
+  next_workflows:
+    - format-document
+    - final-checklist
+
+  tags:
+    - phase-5
+    - review
+    - bias
+    - limitations
+    - transparency

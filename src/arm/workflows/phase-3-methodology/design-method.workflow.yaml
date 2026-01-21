@@ -1,0 +1,147 @@
+workflow:
+  id: design-method
+  name: Design da Metodologia de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 3
+  description: |
+    Workflow para desenhar a metodologia de pesquisa.
+    Define abordagem, tipo de pesquisa e estratégia geral
+    para responder à pergunta de pesquisa.
+  
+  lead_agent: method-architect
+  supporting_agents:
+    - procedure-designer
+    - feasibility-expert
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: true
+    - pattern: "_adks/_memory/objectives.yaml"
+      description: "Objetivos definidos"
+      required: false
+    - pattern: "_adks/_memory/hypotheses.yaml"
+      description: "Hipóteses (se houver)"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: analyze-requirements
+      name: Analisar Requisitos
+      description: "Entender o que a pergunta demanda"
+      agent: method-architect
+      action: analyze_requirements
+      prompt: |
+        Analise o que a pesquisa requer:
+        1. Que tipo de conhecimento será gerado?
+        2. Que tipo de dados são necessários?
+        3. Quais são as restrições (tempo, recursos, acesso)?
+        4. Quais são os requisitos do programa/periódico?
+      output:
+        - requirements_analysis
+
+    - id: select-approach
+      name: Selecionar Abordagem
+      description: "Escolher abordagem metodológica"
+      agent: method-architect
+      action: select_approach
+      prompt: |
+        Escolha a abordagem mais adequada:
+        
+        - **Quantitativa**: Medir, testar hipóteses, generalizar
+        - **Qualitativa**: Compreender, explorar, interpretar
+        - **Mista**: Combinar quantitativa e qualitativa
+        
+        Justifique a escolha com base nos requisitos.
+      input:
+        - requirements_analysis
+      output:
+        - selected_approach
+        - approach_justification
+
+    - id: define-research-type
+      name: Definir Tipo de Pesquisa
+      description: "Especificar o tipo de estudo"
+      agent: method-architect
+      action: define_type
+      prompt: |
+        Defina o tipo de pesquisa:
+        
+        Quanto aos objetivos: exploratória, descritiva, explicativa
+        Quanto aos procedimentos: survey, experimento, estudo de caso,
+        pesquisa-ação, etnografia, revisão sistemática, etc.
+        
+        Justifique as escolhas.
+      input:
+        - selected_approach
+      output:
+        - research_type
+        - type_justification
+
+    - id: outline-method
+      name: Delinear Método
+      description: "Criar visão geral do método"
+      agent: method-architect
+      action: outline_method
+      prompt: |
+        Crie um outline do método incluindo:
+        1. Participantes/amostra/corpus
+        2. Instrumentos/técnicas de coleta
+        3. Procedimentos gerais
+        4. Técnicas de análise
+        5. Considerações éticas
+      input:
+        - research_type
+        - requirements_analysis
+      output:
+        - method_outline
+
+    - id: preliminary-feasibility
+      name: Verificar Viabilidade
+      description: "Avaliar viabilidade do design"
+      agent: feasibility-expert
+      action: check_feasibility
+      prompt: |
+        Avalie a viabilidade do design proposto:
+        1. Tempo necessário vs disponível
+        2. Recursos necessários vs disponíveis
+        3. Acesso a participantes/dados
+        4. Competências técnicas necessárias
+      input:
+        - method_outline
+      output:
+        - feasibility_assessment
+
+    - id: document-design
+      name: Documentar Design
+      description: "Formalizar o design metodológico"
+      agent: method-architect
+      action: document_design
+      input:
+        - selected_approach
+        - research_type
+        - method_outline
+        - feasibility_assessment
+      output:
+        - design_document
+
+  outputs:
+    - name: design_document
+      path: "_adks/_docs/03-methodology/method-design.md"
+      format: md
+    - name: design_data
+      path: "_adks/_memory/method-design.yaml"
+      format: yaml
+
+  next_workflows:
+    - define-procedures
+    - data-strategy
+    - validate-method
+
+  tags:
+    - phase-3
+    - methodology
+    - design
+    - approach

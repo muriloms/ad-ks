@@ -1,0 +1,129 @@
+workflow:
+  id: define-topic
+  name: Definição do Tópico de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 1
+  description: |
+    Workflow para definir e delimitar o tópico de pesquisa.
+    Transforma uma ideia explorada em um tópico específico,
+    delimitado e viável para investigação.
+  
+  lead_agent: idea-facilitator
+  supporting_agents:
+    - question-architect
+    - gap-identifier
+    - feasibility-expert
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/idea-exploration.yaml"
+      description: "Resultados da exploração de ideia"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: review-exploration
+      name: Revisar Exploração
+      description: "Retomar o que foi explorado anteriormente"
+      agent: idea-facilitator
+      action: review_previous
+      prompt: |
+        Se há exploração prévia, resuma os principais pontos.
+        Caso contrário, pergunte sobre o tema de interesse.
+      output:
+        - current_state
+
+    - id: define-scope
+      name: Definir Escopo
+      description: "Delimitar o escopo do tópico"
+      agent: idea-facilitator
+      action: define_scope
+      prompt: |
+        Ajude a delimitar o tópico:
+        1. Qual é o tema geral?
+        2. Qual aspecto específico será focado?
+        3. Quais são os limites (temporal, geográfico, populacional)?
+        4. O que está FORA do escopo?
+      input:
+        - current_state
+      output:
+        - topic_scope
+        - boundaries
+
+    - id: check-specificity
+      name: Verificar Especificidade
+      description: "Garantir que tópico é específico o suficiente"
+      agent: question-architect
+      action: check_specificity
+      prompt: |
+        Avalie se o tópico está:
+        - Específico o suficiente para ser pesquisável
+        - Não tão estreito que seja trivial
+        - Claro e sem ambiguidades
+      input:
+        - topic_scope
+      output:
+        - specificity_assessment
+
+    - id: preliminary-feasibility
+      name: Viabilidade Preliminar
+      description: "Verificar viabilidade inicial"
+      agent: feasibility-expert
+      action: quick_feasibility
+      prompt: |
+        Faça uma avaliação rápida:
+        - É possível pesquisar este tópico?
+        - Há acesso a dados/participantes?
+        - O prazo é compatível?
+      input:
+        - topic_scope
+      output:
+        - feasibility_notes
+      optional: true
+
+    - id: formalize-topic
+      name: Formalizar Tópico
+      description: "Redigir definição formal do tópico"
+      agent: idea-facilitator
+      action: formalize_topic
+      prompt: |
+        Crie uma definição formal do tópico contendo:
+        1. Título provisório
+        2. Descrição em 2-3 sentenças
+        3. Palavras-chave
+        4. Delimitações
+      input:
+        - topic_scope
+        - boundaries
+        - specificity_assessment
+      output:
+        - formal_topic_definition
+
+    - id: save-and-next
+      name: Salvar e Próximos Passos
+      description: "Documentar e orientar continuidade"
+      agent: idea-facilitator
+      action: save_and_suggest
+      input:
+        - formal_topic_definition
+      output:
+        - topic_document
+
+  outputs:
+    - name: topic_document
+      path: "_adks/_docs/01-exploration/topic-definition.md"
+      format: md
+    - name: topic_data
+      path: "_adks/_memory/topic-definition.yaml"
+      format: yaml
+
+  next_workflows:
+    - research-question
+    - analyze-references
+
+  tags:
+    - phase-1
+    - exploration
+    - topic
+    - scope

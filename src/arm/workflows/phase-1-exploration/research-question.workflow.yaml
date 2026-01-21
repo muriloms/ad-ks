@@ -1,0 +1,157 @@
+workflow:
+  id: research-question
+  name: Formulação da Pergunta de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 1
+  description: |
+    Workflow para formular uma pergunta de pesquisa clara, 
+    específica e pesquisável. A pergunta de pesquisa é o 
+    elemento central que guia toda a investigação.
+  
+  lead_agent: question-architect
+  supporting_agents:
+    - idea-facilitator
+    - gap-identifier
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/topic-definition.yaml"
+      description: "Definição do tópico"
+      required: false
+    - pattern: "_adks/_memory/idea-exploration.yaml"
+      description: "Exploração de ideias"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: gather-context
+      name: Reunir Contexto
+      description: "Coletar informações sobre o tema"
+      agent: question-architect
+      action: gather_context
+      prompt: |
+        Reúna informações sobre:
+        1. Tópico definido (se disponível)
+        2. O que o pesquisador quer descobrir/entender
+        3. Por que isso é importante
+        4. O que já se sabe sobre o assunto
+      output:
+        - research_context
+
+    - id: identify-type
+      name: Identificar Tipo de Pergunta
+      description: "Determinar o tipo de pergunta adequado"
+      agent: question-architect
+      action: identify_question_type
+      prompt: |
+        Identifique o tipo de pergunta mais adequado:
+        - Descritiva: "Como é X?" / "Quais são as características de X?"
+        - Explicativa: "Por que X?" / "Qual a relação entre X e Y?"
+        - Exploratória: "O que é X?" / "Como funciona X?"
+        - Avaliativa: "Qual é melhor, X ou Y?"
+        - Prescritiva: "Como melhorar X?"
+      input:
+        - research_context
+      output:
+        - question_type
+        - type_rationale
+
+    - id: draft-questions
+      name: Rascunhar Perguntas
+      description: "Criar múltiplas versões da pergunta"
+      agent: question-architect
+      action: draft_questions
+      prompt: |
+        Crie 3-5 versões da pergunta de pesquisa:
+        1. Variando a especificidade
+        2. Variando o foco
+        3. Variando a abordagem
+        
+        Para cada versão, indique pontos fortes e fracos.
+      input:
+        - research_context
+        - question_type
+      output:
+        - draft_questions
+
+    - id: evaluate-questions
+      name: Avaliar Perguntas
+      description: "Avaliar qualidade de cada versão"
+      agent: question-architect
+      action: evaluate_questions
+      prompt: |
+        Avalie cada pergunta usando os critérios:
+        1. Clareza (0-5)
+        2. Especificidade (0-5)
+        3. Relevância (0-5)
+        4. Viabilidade (0-5)
+        5. Originalidade (0-5)
+        
+        Apresente tabela comparativa.
+      input:
+        - draft_questions
+      output:
+        - evaluation_results
+
+    - id: select-question
+      name: Selecionar Pergunta
+      description: "Escolher a pergunta principal"
+      agent: question-architect
+      action: select_question
+      prompt: |
+        Com base na avaliação, ajude o pesquisador a:
+        1. Escolher a melhor versão
+        2. Fazer ajustes finais se necessário
+        3. Confirmar a pergunta principal
+      input:
+        - evaluation_results
+      output:
+        - main_question
+
+    - id: define-sub-questions
+      name: Definir Perguntas Secundárias
+      description: "Criar perguntas específicas derivadas"
+      agent: question-architect
+      action: define_sub_questions
+      prompt: |
+        Derive 2-4 perguntas secundárias que:
+        1. Sejam mais específicas que a principal
+        2. Ajudem a responder a pergunta principal
+        3. Possam guiar etapas da pesquisa
+      input:
+        - main_question
+      output:
+        - sub_questions
+      optional: true
+
+    - id: document-question
+      name: Documentar Pergunta
+      description: "Formalizar a pergunta de pesquisa"
+      agent: question-architect
+      action: document_question
+      input:
+        - main_question
+        - sub_questions
+        - question_type
+      output:
+        - question_document
+
+  outputs:
+    - name: question_document
+      path: "_adks/_docs/01-exploration/research-question.md"
+      format: md
+    - name: question_data
+      path: "_adks/_memory/research-question.yaml"
+      format: yaml
+
+  next_workflows:
+    - define-objectives
+    - build-hypothesis
+    - analyze-references
+
+  tags:
+    - phase-1
+    - exploration
+    - research-question
+    - problematization

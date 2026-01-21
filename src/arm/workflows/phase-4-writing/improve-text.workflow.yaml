@@ -1,0 +1,162 @@
+workflow:
+  id: improve-text
+  name: Melhoria de Texto Acadêmico
+  version: "1.0.0"
+  module: arm
+  phase: 4
+  description: |
+    Workflow para melhorar texto acadêmico existente.
+    Foca em clareza, coesão, estilo e impacto do texto.
+  
+  lead_agent: academic-writer
+  supporting_agents:
+    - style-guardian
+    - logic-checker
+  
+  input_file_patterns:
+    - pattern: "_adks/_uploads/*.docx"
+      description: "Documento Word"
+      required: false
+    - pattern: "_adks/_uploads/*.md"
+      description: "Documento Markdown"
+      required: false
+    - pattern: "_adks/_uploads/*.tex"
+      description: "Documento LaTeX"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: receive-text
+      name: Receber Texto
+      description: "Obter texto a ser melhorado"
+      agent: academic-writer
+      action: receive_text
+      prompt: |
+        Receba o texto para melhoria:
+        1. Peça o texto ou arquivo
+        2. Identifique o tipo de melhoria desejada
+        3. Pergunte sobre contexto (seção, público, etc.)
+        4. Entenda restrições (tamanho, estilo, etc.)
+      output:
+        - original_text
+        - improvement_goals
+        - constraints
+
+    - id: diagnose-issues
+      name: Diagnosticar Problemas
+      description: "Identificar pontos de melhoria"
+      agent: academic-writer
+      action: diagnose_issues
+      prompt: |
+        Analise o texto e identifique:
+        1. Problemas de clareza
+        2. Problemas de estrutura
+        3. Problemas de coesão
+        4. Problemas de estilo
+        5. Pontos fortes a manter
+      input:
+        - original_text
+      output:
+        - diagnosis
+
+    - id: check-logic-flow
+      name: Verificar Fluxo Lógico
+      description: "Analisar coerência argumentativa"
+      agent: logic-checker
+      action: check_flow
+      prompt: |
+        Verifique o fluxo lógico:
+        1. Os argumentos seguem sequência lógica?
+        2. Há saltos ou lacunas?
+        3. As transições são adequadas?
+        4. A conclusão decorre das premissas?
+      input:
+        - original_text
+      output:
+        - logic_assessment
+      optional: true
+
+    - id: improve-clarity
+      name: Melhorar Clareza
+      description: "Tornar texto mais claro"
+      agent: academic-writer
+      action: improve_clarity
+      prompt: |
+        Melhore a clareza do texto:
+        1. Simplifique frases complexas
+        2. Elimine ambiguidades
+        3. Defina termos quando necessário
+        4. Use linguagem precisa
+      input:
+        - original_text
+        - diagnosis
+      output:
+        - clearer_text
+
+    - id: improve-cohesion
+      name: Melhorar Coesão
+      description: "Melhorar conexões entre partes"
+      agent: academic-writer
+      action: improve_cohesion
+      prompt: |
+        Melhore a coesão:
+        1. Adicione/melhore transições
+        2. Use conectivos adequados
+        3. Mantenha consistência terminológica
+        4. Crie referências internas quando útil
+      input:
+        - clearer_text
+      output:
+        - cohesive_text
+
+    - id: refine-style
+      name: Refinar Estilo
+      description: "Polir o estilo do texto"
+      agent: style-guardian
+      action: refine_style
+      prompt: |
+        Refine o estilo:
+        1. Ajuste tom acadêmico
+        2. Elimine verbosidade
+        3. Varie estrutura das frases
+        4. Garanta consistência
+      input:
+        - cohesive_text
+        - constraints
+      output:
+        - refined_text
+
+    - id: present-improvements
+      name: Apresentar Melhorias
+      description: "Mostrar versão melhorada"
+      agent: academic-writer
+      action: present_improvements
+      prompt: |
+        Apresente o resultado:
+        1. Mostre versão melhorada
+        2. Destaque principais mudanças
+        3. Explique razões das alterações
+        4. Ofereça alternativas quando relevante
+      input:
+        - original_text
+        - refined_text
+        - diagnosis
+      output:
+        - improved_document
+
+  outputs:
+    - name: improved_document
+      path: "_adks/_docs/04-writing/improved-text.md"
+      format: md
+
+  next_workflows:
+    - review-logic
+    - audit-citations
+
+  tags:
+    - phase-4
+    - writing
+    - improvement
+    - editing
+    - clarity

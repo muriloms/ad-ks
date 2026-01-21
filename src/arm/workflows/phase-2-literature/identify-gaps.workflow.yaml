@@ -1,0 +1,139 @@
+workflow:
+  id: identify-gaps
+  name: Identificação de Lacunas na Literatura
+  version: "1.0.0"
+  module: arm
+  phase: 2
+  description: |
+    Workflow para identificar e articular lacunas na literatura.
+    Lacunas bem identificadas justificam a relevância e originalidade
+    da pesquisa.
+  
+  lead_agent: gap-identifier
+  supporting_agents:
+    - literature-curator
+    - theory-connector
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/references-analysis.yaml"
+      description: "Análise de referências"
+      required: false
+    - pattern: "_adks/_memory/theoretical-framework.yaml"
+      description: "Framework teórico"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: review-literature-state
+      name: Revisar Estado da Literatura
+      description: "Entender o que já existe"
+      agent: gap-identifier
+      action: review_state
+      prompt: |
+        Revise o que a literatura já oferece:
+        1. O que já foi estudado sobre o tema?
+        2. Quais perguntas já foram respondidas?
+        3. Quais métodos já foram usados?
+        4. Quais contextos já foram investigados?
+      output:
+        - literature_state
+
+    - id: identify-gap-types
+      name: Identificar Tipos de Lacunas
+      description: "Categorizar lacunas encontradas"
+      agent: gap-identifier
+      action: identify_gaps
+      prompt: |
+        Identifique lacunas por tipo:
+        
+        - **Teóricas**: Conceitos não explorados, teorias não testadas
+        - **Metodológicas**: Métodos não aplicados ao contexto
+        - **Empíricas**: Populações/contextos não estudados
+        - **Temporais**: Estudos desatualizados
+        - **Contraditórias**: Resultados conflitantes
+        - **Relacionais**: Conexões não investigadas
+      input:
+        - literature_state
+      output:
+        - gaps_identified
+
+    - id: assess-significance
+      name: Avaliar Significância
+      description: "Determinar importância de cada lacuna"
+      agent: gap-identifier
+      action: assess_significance
+      prompt: |
+        Para cada lacuna, avalie:
+        1. Por que é importante preencher?
+        2. Quem se beneficia se for preenchida?
+        3. Qual o impacto potencial?
+        4. É viável preenchê-la?
+        
+        Priorize as lacunas mais significativas.
+      input:
+        - gaps_identified
+      output:
+        - gaps_prioritized
+
+    - id: connect-to-research
+      name: Conectar à Pesquisa
+      description: "Vincular lacunas ao estudo proposto"
+      agent: gap-identifier
+      action: connect_to_research
+      prompt: |
+        Para a(s) lacuna(s) principal(is):
+        1. Como sua pesquisa preenche esta lacuna?
+        2. Qual será a contribuição específica?
+        3. Por que seu estudo é adequado para isso?
+      input:
+        - gaps_prioritized
+      output:
+        - research_connection
+
+    - id: build-justification
+      name: Construir Justificativa
+      description: "Redigir justificativa da pesquisa"
+      agent: gap-identifier
+      action: build_justification
+      prompt: |
+        Construa a justificativa da pesquisa:
+        1. Apresente o problema/lacuna
+        2. Demonstre a importância de estudá-lo
+        3. Explique como seu estudo contribui
+        4. Destaque a originalidade
+      input:
+        - research_connection
+        - gaps_prioritized
+      output:
+        - justification_text
+
+    - id: document-gaps
+      name: Documentar Lacunas
+      description: "Criar documentação formal"
+      agent: gap-identifier
+      action: document_gaps
+      input:
+        - gaps_prioritized
+        - justification_text
+      output:
+        - gaps_document
+
+  outputs:
+    - name: gaps_document
+      path: "_adks/_docs/02-literature/literature-gaps.md"
+      format: md
+    - name: gaps_data
+      path: "_adks/_memory/literature-gaps.yaml"
+      format: yaml
+
+  next_workflows:
+    - write-review
+    - design-method
+
+  tags:
+    - phase-2
+    - literature
+    - gaps
+    - justification
+    - contribution

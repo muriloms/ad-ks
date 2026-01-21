@@ -1,0 +1,216 @@
+module:
+  id: arm
+  name: Academic Research Module
+  version: "1.0.0"
+  description: |
+    Módulo principal do AD-KS para desenvolvimento de pesquisa científica.
+    Contém 7 equipes especializadas com 25+ agentes e 40+ workflows
+    organizados em 6 fases de pesquisa acadêmica.
+  author: AD-KS Team
+  language: pt-br
+
+  # As 7 equipes do ARM
+  teams:
+    - id: team-builder
+      name: Team Builder
+      description: |
+        Equipe responsável pela primeira interação com o pesquisador.
+        Analisa o contexto e área científica para criar agentes 
+        especializados dinamicamente.
+      agents:
+        - context-analyst
+        - agent-builder
+        - domain-expert
+      lead: context-analyst
+
+    - id: team-ideation
+      name: Team Ideation
+      description: |
+        Equipe de brainstorming e formulação de ideias.
+        Ajuda a explorar tópicos, formular perguntas de pesquisa
+        e construir hipóteses sólidas.
+      agents:
+        - idea-facilitator
+        - question-architect
+        - hypothesis-builder
+        - gap-identifier
+        - vision-synthesizer
+      lead: idea-facilitator
+
+    - id: team-rigor
+      name: Team Rigor
+      description: |
+        Equipe de validação e rigor científico.
+        Verifica metodologia, lógica, citações e detecta vieses.
+      agents:
+        - method-validator
+        - logic-checker
+        - citation-auditor
+        - bias-detector
+      lead: method-validator
+
+    - id: team-methodology
+      name: Team Methodology
+      description: |
+        Equipe de design metodológico.
+        Auxilia na criação de métodos, procedimentos e 
+        estratégias de coleta de dados.
+      agents:
+        - method-architect
+        - procedure-designer
+        - data-strategist
+        - feasibility-expert
+      lead: method-architect
+
+    - id: team-literature
+      name: Team Literature
+      description: |
+        Equipe de revisão da literatura.
+        Curadoria, análise e síntese de referências bibliográficas.
+      agents:
+        - literature-curator
+        - theory-connector
+        - synthesis-writer
+        - reference-manager
+      lead: literature-curator
+
+    - id: team-writing
+      name: Team Writing
+      description: |
+        Equipe de escrita acadêmica.
+        Redação, estruturação, estilo e formatação de textos científicos.
+      agents:
+        - academic-writer
+        - structure-designer
+        - style-guardian
+        - latex-specialist
+        - presentation-expert
+      lead: academic-writer
+
+    - id: team-planning
+      name: Team Planning
+      description: |
+        Equipe de planejamento e coordenação.
+        Gerenciamento de projeto, cronograma e tarefas.
+      agents:
+        - project-planner
+        - progress-tracker
+        - task-coordinator
+      lead: project-planner
+
+  # As 6 fases da pesquisa
+  phases:
+    - id: 1
+      name: Exploração e Definição
+      description: Fase inicial de exploração de ideias e definição do escopo
+      workflows:
+        - explore-idea
+        - define-topic
+        - research-question
+        - define-objectives
+        - build-hypothesis
+
+    - id: 2
+      name: Revisão da Literatura
+      description: Análise e síntese da literatura existente
+      workflows:
+        - analyze-references
+        - build-framework
+        - identify-gaps
+        - write-review
+
+    - id: 3
+      name: Metodologia
+      description: Design e validação da metodologia de pesquisa
+      workflows:
+        - design-method
+        - define-procedures
+        - data-strategy
+        - validate-method
+
+    - id: 4
+      name: Escrita e Estruturação
+      description: Redação e formatação do manuscrito
+      workflows:
+        - plan-structure
+        - write-section
+        - write-abstract
+        - format-latex
+
+    - id: 5
+      name: Revisão e Validação
+      description: Revisão crítica e validação do trabalho
+      workflows:
+        - scientific-review
+        - check-logic
+        - audit-citations
+        - detect-bias
+
+    - id: 6
+      name: Finalização e Publicação
+      description: Preparação final para submissão e publicação
+      workflows:
+        - format-journal
+        - create-presentation
+        - submission-checklist
+
+  # Diretórios
+  agents_dir: ./agents
+  workflows_dir: ./workflows
+  templates_dir: ./templates
+
+  # Dependência do core
+  dependencies:
+    - core
+
+  # Configurações do módulo
+  config:
+    # Opções de início disponíveis no workflow-init
+    start_options:
+      - id: new-research
+        name: "🌱 Nova Pesquisa"
+        description: "Começar do zero com Team Builder"
+        workflow: new-research
+        team: team-builder
+      
+      - id: explore-idea
+        name: "💡 Explorar Ideia"
+        description: "Brainstorming guiado"
+        workflow: explore-idea
+        team: team-ideation
+      
+      - id: continue-project
+        name: "📝 Continuar Projeto"
+        description: "Retomar projeto existente"
+        workflow: continue-project
+        team: null
+      
+      - id: literature-review
+        name: "📚 Revisão da Literatura"
+        description: "Analisar referências"
+        workflow: analyze-references
+        team: team-literature
+      
+      - id: methodology
+        name: "🔬 Desenvolver Metodologia"
+        description: "Design metodológico"
+        workflow: design-method
+        team: team-methodology
+      
+      - id: write-article
+        name: "✍️ Escrever Artigo"
+        description: "Redação acadêmica"
+        workflow: write-section
+        team: team-writing
+      
+      - id: review-work
+        name: "🔍 Revisar Trabalho"
+        description: "Validação com Team Rigor"
+        workflow: scientific-review
+        team: team-rigor
+      
+      - id: improve-text
+        name: "📖 Melhorar Texto"
+        description: "Aprimorar texto existente"
+        workflow: improve-text
+        team: team-writing

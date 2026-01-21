@@ -1,0 +1,131 @@
+workflow:
+  id: explore-idea
+  name: Exploração de Ideia de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 1
+  description: |
+    Workflow para explorar e desenvolver uma ideia inicial de pesquisa.
+    Usa técnicas de brainstorming e expansão criativa para transformar
+    intuições vagas em direções concretas de investigação.
+  
+  lead_agent: idea-facilitator
+  supporting_agents:
+    - question-architect
+    - gap-identifier
+  
+  input_file_patterns:
+    - pattern: "_adks/_config/project-config.yaml"
+      description: "Configuração do projeto"
+      required: false
+    - pattern: "_adks/_memory/context-analysis.yaml"
+      description: "Análise de contexto do Team Builder"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: welcome
+      name: Boas-vindas e Contextualização
+      description: "Apresentar o processo e entender o ponto de partida"
+      agent: idea-facilitator
+      action: welcome_and_context
+      prompt: |
+        Apresente-se brevemente e pergunte ao pesquisador sobre sua ideia
+        ou área de interesse. Use o prompt de boas-vindas.
+      output:
+        - initial_idea
+        - researcher_context
+
+    - id: divergent-exploration
+      name: Exploração Divergente
+      description: "Expandir a ideia em múltiplas direções"
+      agent: idea-facilitator
+      action: divergent_brainstorm
+      prompt: |
+        Conduza uma sessão de brainstorming divergente:
+        1. Peça ao pesquisador para listar tudo que vem à mente
+        2. Faça perguntas que expandam a ideia
+        3. Sugira conexões inesperadas
+        4. Documente todas as direções possíveis
+      input:
+        - initial_idea
+      output:
+        - expanded_ideas
+        - potential_directions
+
+    - id: convergent-selection
+      name: Seleção Convergente
+      description: "Filtrar e priorizar as direções mais promissoras"
+      agent: idea-facilitator
+      action: converge_ideas
+      prompt: |
+        Ajude o pesquisador a filtrar as ideias:
+        1. Apresente critérios de seleção (interesse, viabilidade, relevância)
+        2. Avalie cada direção com o pesquisador
+        3. Identifique 2-3 direções mais promissoras
+        4. Peça ao pesquisador para escolher
+      input:
+        - expanded_ideas
+      output:
+        - selected_direction
+        - selection_rationale
+
+    - id: initial-gap-check
+      name: Verificação Inicial de Lacuna
+      description: "Verificar se direção tem potencial de contribuição"
+      agent: gap-identifier
+      action: preliminary_gap_check
+      prompt: |
+        Faça uma verificação preliminar:
+        1. O que já se sabe sobre este tema?
+        2. Quais perguntas ainda não foram respondidas?
+        3. Há espaço para contribuição original?
+      input:
+        - selected_direction
+      output:
+        - preliminary_gap_assessment
+      optional: true
+
+    - id: document-exploration
+      name: Documentar Exploração
+      description: "Salvar resultados da exploração"
+      agent: idea-facilitator
+      action: document_results
+      input:
+        - selected_direction
+        - selection_rationale
+        - preliminary_gap_assessment
+      output:
+        - exploration_document
+
+    - id: next-steps
+      name: Próximos Passos
+      description: "Orientar sobre continuidade"
+      agent: idea-facilitator
+      action: suggest_next_steps
+      prompt: |
+        Apresente opções de próximos passos:
+        1. Definir o tópico mais especificamente (*define-topic)
+        2. Formular pergunta de pesquisa (*research-question)
+        3. Explorar mais a ideia (*brainstorm)
+        4. Verificar literatura existente (*team-literature)
+
+  outputs:
+    - name: exploration_document
+      path: "_adks/_docs/01-exploration/idea-exploration.md"
+      format: md
+    - name: exploration_data
+      path: "_adks/_memory/idea-exploration.yaml"
+      format: yaml
+
+  next_workflows:
+    - define-topic
+    - research-question
+    - analyze-references
+
+  tags:
+    - phase-1
+    - exploration
+    - ideation
+    - brainstorming

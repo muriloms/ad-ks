@@ -1,0 +1,145 @@
+workflow:
+  id: build-hypothesis
+  name: Construção de Hipóteses
+  version: "1.0.0"
+  module: arm
+  phase: 1
+  description: |
+    Workflow para formular hipóteses científicas testáveis.
+    Transforma intuições e teorias em previsões específicas
+    que podem ser confirmadas ou refutadas pela pesquisa.
+  
+  lead_agent: hypothesis-builder
+  supporting_agents:
+    - question-architect
+    - theory-connector
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa"
+      required: true
+    - pattern: "_adks/_memory/objectives.yaml"
+      description: "Objetivos definidos"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: assess-need
+      name: Avaliar Necessidade de Hipóteses
+      description: "Verificar se pesquisa requer hipóteses"
+      agent: hypothesis-builder
+      action: assess_hypothesis_need
+      prompt: |
+        Avalie se a pesquisa requer hipóteses formais:
+        - Pesquisa quantitativa/explicativa: geralmente sim
+        - Pesquisa qualitativa/exploratória: geralmente não
+        - Pesquisa mista: depende do componente
+        
+        Explique a decisão ao pesquisador.
+      output:
+        - needs_hypothesis
+        - rationale
+
+    - id: identify-variables
+      name: Identificar Variáveis
+      description: "Mapear variáveis da pesquisa"
+      agent: hypothesis-builder
+      action: identify_variables
+      condition: "needs_hypothesis == true"
+      prompt: |
+        Identifique as variáveis:
+        1. Variável independente (causa/preditor)
+        2. Variável dependente (efeito/resultado)
+        3. Variáveis de controle (a serem controladas)
+        4. Variáveis intervenientes (possíveis mediadoras)
+        
+        Para cada uma, defina como será medida.
+      output:
+        - variables_map
+
+    - id: review-theory
+      name: Revisar Base Teórica
+      description: "Conectar hipóteses com teoria"
+      agent: theory-connector
+      action: connect_theory
+      condition: "needs_hypothesis == true"
+      prompt: |
+        Identifique a base teórica para as hipóteses:
+        1. Que teorias sustentam a relação esperada?
+        2. Que estudos empíricos anteriores sugerem?
+        3. Qual a lógica/mecanismo da relação?
+      input:
+        - variables_map
+      output:
+        - theoretical_basis
+      optional: true
+
+    - id: formulate-hypotheses
+      name: Formular Hipóteses
+      description: "Criar hipóteses alternativa e nula"
+      agent: hypothesis-builder
+      action: formulate_hypotheses
+      condition: "needs_hypothesis == true"
+      prompt: |
+        Para cada relação importante, formule:
+        
+        **Hipótese Alternativa (H1):**
+        - Afirmação positiva da relação esperada
+        - Ex: "X está positivamente relacionado a Y"
+        
+        **Hipótese Nula (H0):**
+        - Negação da relação
+        - Ex: "Não há relação entre X e Y"
+      input:
+        - variables_map
+        - theoretical_basis
+      output:
+        - hypotheses_set
+
+    - id: verify-testability
+      name: Verificar Testabilidade
+      description: "Confirmar que hipóteses são testáveis"
+      agent: hypothesis-builder
+      action: verify_testability
+      condition: "needs_hypothesis == true"
+      prompt: |
+        Para cada hipótese, verifique:
+        1. É específica o suficiente?
+        2. É falseável (pode ser refutada)?
+        3. É possível coletar dados para testá-la?
+        4. O método pretendido permite testá-la?
+      input:
+        - hypotheses_set
+      output:
+        - testability_assessment
+
+    - id: document-hypotheses
+      name: Documentar Hipóteses
+      description: "Formalizar documentação"
+      agent: hypothesis-builder
+      action: document_hypotheses
+      input:
+        - hypotheses_set
+        - variables_map
+        - testability_assessment
+      output:
+        - hypotheses_document
+
+  outputs:
+    - name: hypotheses_document
+      path: "_adks/_docs/01-exploration/hypotheses.md"
+      format: md
+    - name: hypotheses_data
+      path: "_adks/_memory/hypotheses.yaml"
+      format: yaml
+
+  next_workflows:
+    - analyze-references
+    - design-method
+
+  tags:
+    - phase-1
+    - exploration
+    - hypothesis
+    - variables

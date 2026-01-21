@@ -1,0 +1,158 @@
+workflow:
+  id: review-logic
+  name: Revisão Lógica e Argumentativa
+  version: "1.0.0"
+  module: arm
+  phase: 5
+  description: |
+    Workflow para revisar a lógica e argumentação do trabalho.
+    Verifica coerência, identifica falácias e fortalece
+    a estrutura argumentativa.
+  
+  lead_agent: logic-checker
+  supporting_agents:
+    - method-validator
+    - academic-writer
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/04-writing/**/*.md"
+      description: "Seções escritas"
+      required: false
+    - pattern: "_adks/_uploads/*.docx"
+      description: "Documento completo"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: receive-document
+      name: Receber Documento
+      description: "Obter texto para revisão"
+      agent: logic-checker
+      action: receive_document
+      prompt: |
+        Receba o documento para revisão lógica:
+        1. Identifique as partes a revisar
+        2. Entenda o tipo de argumento (empírico, teórico, etc.)
+        3. Note a estrutura geral
+      output:
+        - document_content
+        - argument_type
+
+    - id: map-arguments
+      name: Mapear Argumentos
+      description: "Identificar estrutura argumentativa"
+      agent: logic-checker
+      action: map_arguments
+      prompt: |
+        Mapeie a estrutura dos argumentos:
+        1. Identifique premissas principais
+        2. Identifique conclusões
+        3. Trace conexões premissa → conclusão
+        4. Note argumentos implícitos
+      input:
+        - document_content
+      output:
+        - argument_map
+
+    - id: check-validity
+      name: Verificar Validade
+      description: "Avaliar validade lógica"
+      agent: logic-checker
+      action: check_validity
+      prompt: |
+        Verifique a validade dos argumentos:
+        1. Conclusões decorrem das premissas?
+        2. Há saltos lógicos?
+        3. Premissas estão justificadas?
+        4. Evidências suportam afirmações?
+      input:
+        - argument_map
+      output:
+        - validity_assessment
+
+    - id: identify-fallacies
+      name: Identificar Falácias
+      description: "Detectar erros de raciocínio"
+      agent: logic-checker
+      action: identify_fallacies
+      prompt: |
+        Identifique possíveis falácias:
+        - Generalização apressada
+        - Falsa causa (post hoc)
+        - Apelo à autoridade inadequado
+        - Petição de princípio
+        - Falso dilema
+        - Ad hominem
+        - E outras...
+      input:
+        - argument_map
+        - validity_assessment
+      output:
+        - fallacies_found
+
+    - id: check-evidence-claims
+      name: Verificar Evidências
+      description: "Conferir se afirmações têm suporte"
+      agent: logic-checker
+      action: check_evidence
+      prompt: |
+        Verifique o suporte das afirmações:
+        1. Afirmações têm evidência adequada?
+        2. Evidências são relevantes?
+        3. Há afirmações sem suporte?
+        4. Fontes são confiáveis?
+      input:
+        - document_content
+      output:
+        - evidence_check
+
+    - id: suggest-improvements
+      name: Sugerir Melhorias
+      description: "Propor correções"
+      agent: logic-checker
+      action: suggest_improvements
+      prompt: |
+        Para cada problema identificado:
+        1. Explique o problema claramente
+        2. Sugira correção específica
+        3. Ofereça alternativa de reformulação
+        4. Indique prioridade
+      input:
+        - validity_assessment
+        - fallacies_found
+        - evidence_check
+      output:
+        - improvement_suggestions
+
+    - id: document-review
+      name: Documentar Revisão
+      description: "Criar relatório de revisão"
+      agent: logic-checker
+      action: document_review
+      input:
+        - argument_map
+        - validity_assessment
+        - fallacies_found
+        - improvement_suggestions
+      output:
+        - logic_review_document
+
+  outputs:
+    - name: logic_review_document
+      path: "_adks/_docs/05-review/logic-review.md"
+      format: md
+    - name: logic_review_data
+      path: "_adks/_memory/logic-review.yaml"
+      format: yaml
+
+  next_workflows:
+    - audit-citations
+    - detect-bias
+
+  tags:
+    - phase-5
+    - review
+    - logic
+    - argumentation
+    - fallacies

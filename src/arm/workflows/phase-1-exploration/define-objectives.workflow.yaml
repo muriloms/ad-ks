@@ -1,0 +1,137 @@
+workflow:
+  id: define-objectives
+  name: Definição de Objetivos de Pesquisa
+  version: "1.0.0"
+  module: arm
+  phase: 1
+  description: |
+    Workflow para definir objetivos geral e específicos da pesquisa.
+    Os objetivos traduzem a pergunta de pesquisa em metas concretas
+    que guiam a execução do estudo.
+  
+  lead_agent: question-architect
+  supporting_agents:
+    - vision-synthesizer
+    - feasibility-expert
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/research-question.yaml"
+      description: "Pergunta de pesquisa definida"
+      required: true
+  
+  sharded: false
+  
+  steps:
+    - id: review-question
+      name: Revisar Pergunta de Pesquisa
+      description: "Retomar a pergunta para derivar objetivos"
+      agent: question-architect
+      action: review_question
+      prompt: |
+        Revise a pergunta de pesquisa e identifique:
+        1. O que precisa ser feito para respondê-la
+        2. Quais são os componentes da pergunta
+        3. Que tipo de resultado é esperado
+      output:
+        - question_analysis
+
+    - id: define-general-objective
+      name: Definir Objetivo Geral
+      description: "Formular o objetivo geral da pesquisa"
+      agent: question-architect
+      action: define_general
+      prompt: |
+        Formule o objetivo geral:
+        1. Deve começar com verbo no infinitivo
+        2. Deve estar alinhado com a pergunta
+        3. Deve indicar o resultado esperado
+        
+        Verbos comuns: analisar, investigar, compreender, avaliar,
+        propor, desenvolver, identificar, comparar...
+      input:
+        - question_analysis
+      output:
+        - general_objective
+
+    - id: derive-specific-objectives
+      name: Derivar Objetivos Específicos
+      description: "Criar objetivos específicos"
+      agent: question-architect
+      action: derive_specifics
+      prompt: |
+        Derive 3-5 objetivos específicos que:
+        1. Sejam etapas para atingir o objetivo geral
+        2. Sejam mensuráveis e concretos
+        3. Cubram todos os aspectos da pesquisa
+        4. Sigam uma sequência lógica
+        
+        Cada objetivo específico deve usar verbo diferente.
+      input:
+        - general_objective
+      output:
+        - specific_objectives
+
+    - id: verify-alignment
+      name: Verificar Alinhamento
+      description: "Confirmar coerência entre elementos"
+      agent: vision-synthesizer
+      action: verify_alignment
+      prompt: |
+        Verifique se há alinhamento entre:
+        1. Pergunta → Objetivo Geral
+        2. Objetivo Geral → Objetivos Específicos
+        3. Objetivos Específicos → Perguntas Secundárias (se houver)
+        
+        Identifique inconsistências.
+      input:
+        - general_objective
+        - specific_objectives
+      output:
+        - alignment_check
+
+    - id: check-feasibility
+      name: Verificar Viabilidade
+      description: "Avaliar se objetivos são atingíveis"
+      agent: feasibility-expert
+      action: check_objectives_feasibility
+      prompt: |
+        Para cada objetivo específico, avalie:
+        1. É possível atingir com os recursos disponíveis?
+        2. O prazo é compatível?
+        3. Há dependências externas?
+      input:
+        - specific_objectives
+      output:
+        - feasibility_assessment
+      optional: true
+
+    - id: finalize-objectives
+      name: Finalizar Objetivos
+      description: "Documentar objetivos finais"
+      agent: question-architect
+      action: finalize_objectives
+      input:
+        - general_objective
+        - specific_objectives
+        - alignment_check
+      output:
+        - objectives_document
+
+  outputs:
+    - name: objectives_document
+      path: "_adks/_docs/01-exploration/objectives.md"
+      format: md
+    - name: objectives_data
+      path: "_adks/_memory/objectives.yaml"
+      format: yaml
+
+  next_workflows:
+    - build-hypothesis
+    - analyze-references
+    - design-method
+
+  tags:
+    - phase-1
+    - exploration
+    - objectives
+    - goals

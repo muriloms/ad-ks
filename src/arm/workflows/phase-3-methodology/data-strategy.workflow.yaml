@@ -1,0 +1,144 @@
+workflow:
+  id: data-strategy
+  name: Estratégia de Dados
+  version: "1.0.0"
+  module: arm
+  phase: 3
+  description: |
+    Workflow para definir a estratégia completa de dados.
+    Inclui definição de variáveis, plano de amostragem e
+    plano de análise detalhado.
+  
+  lead_agent: data-strategist
+  supporting_agents:
+    - method-architect
+    - procedure-designer
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/method-design.yaml"
+      description: "Design metodológico"
+      required: false
+    - pattern: "_adks/_memory/hypotheses.yaml"
+      description: "Hipóteses"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: define-variables
+      name: Definir Variáveis/Constructos
+      description: "Especificar variáveis da pesquisa"
+      agent: data-strategist
+      action: define_variables
+      prompt: |
+        Defina as variáveis/constructos:
+        
+        Para pesquisa quantitativa:
+        - Variável dependente
+        - Variável independente
+        - Variáveis de controle
+        - Operacionalização de cada uma
+        
+        Para pesquisa qualitativa:
+        - Constructos/categorias de interesse
+        - Dimensões de análise
+      output:
+        - variables_definition
+
+    - id: plan-sampling
+      name: Planejar Amostragem
+      description: "Definir estratégia amostral"
+      agent: data-strategist
+      action: plan_sampling
+      prompt: |
+        Defina a estratégia de amostragem:
+        1. Tipo de amostragem (probabilística/não-probabilística)
+        2. Técnica específica
+        3. Tamanho da amostra
+        4. Cálculo/justificativa do tamanho
+        5. Critérios de seleção
+      output:
+        - sampling_plan
+
+    - id: define-data-sources
+      name: Definir Fontes de Dados
+      description: "Especificar de onde vêm os dados"
+      agent: data-strategist
+      action: define_sources
+      prompt: |
+        Especifique as fontes de dados:
+        1. Dados primários vs secundários
+        2. Fontes específicas
+        3. Formato dos dados
+        4. Como acessar/coletar
+        5. Limitações de cada fonte
+      input:
+        - sampling_plan
+      output:
+        - data_sources
+
+    - id: create-analysis-plan
+      name: Criar Plano de Análise
+      description: "Detalhar como analisar os dados"
+      agent: data-strategist
+      action: create_analysis_plan
+      prompt: |
+        Crie o plano de análise:
+        
+        Para cada objetivo/hipótese:
+        1. Que dados são necessários?
+        2. Que análise será feita?
+        3. Que teste/técnica será usada?
+        4. Que software será usado?
+        5. Como interpretar os resultados?
+      input:
+        - variables_definition
+      output:
+        - analysis_plan
+
+    - id: plan-data-management
+      name: Planejar Gestão de Dados
+      description: "Definir como gerenciar dados"
+      agent: data-strategist
+      action: plan_management
+      prompt: |
+        Defina a gestão de dados:
+        1. Como dados serão armazenados
+        2. Formato de arquivos
+        3. Backup e segurança
+        4. Organização/nomenclatura
+        5. Tempo de retenção
+      output:
+        - data_management_plan
+
+    - id: document-strategy
+      name: Documentar Estratégia
+      description: "Compilar documentação"
+      agent: data-strategist
+      action: document_strategy
+      input:
+        - variables_definition
+        - sampling_plan
+        - data_sources
+        - analysis_plan
+        - data_management_plan
+      output:
+        - strategy_document
+
+  outputs:
+    - name: strategy_document
+      path: "_adks/_docs/03-methodology/data-strategy.md"
+      format: md
+    - name: strategy_data
+      path: "_adks/_memory/data-strategy.yaml"
+      format: yaml
+
+  next_workflows:
+    - validate-method
+
+  tags:
+    - phase-3
+    - methodology
+    - data
+    - sampling
+    - analysis

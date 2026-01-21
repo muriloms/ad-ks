@@ -1,0 +1,150 @@
+workflow:
+  id: write-review
+  name: Escrita da Revisão da Literatura
+  version: "1.0.0"
+  module: arm
+  phase: 2
+  description: |
+    Workflow para escrever a revisão da literatura do artigo/dissertação.
+    Transforma a análise das referências em uma narrativa coesa
+    e bem estruturada.
+  
+  lead_agent: synthesis-writer
+  supporting_agents:
+    - literature-curator
+    - theory-connector
+    - academic-writer
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/references-analysis.yaml"
+      description: "Análise de referências"
+      required: false
+    - pattern: "_adks/_memory/theoretical-framework.yaml"
+      description: "Framework teórico"
+      required: false
+    - pattern: "_adks/_memory/literature-gaps.yaml"
+      description: "Lacunas identificadas"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: plan-structure
+      name: Planejar Estrutura
+      description: "Definir organização da revisão"
+      agent: synthesis-writer
+      action: plan_structure
+      prompt: |
+        Defina a estrutura da revisão:
+        1. Abordagem: temática, cronológica, metodológica?
+        2. Seções principais
+        3. Subseções dentro de cada seção
+        4. Fluxo narrativo geral
+        
+        Crie um outline detalhado.
+      output:
+        - review_outline
+
+    - id: write-introduction
+      name: Escrever Introdução da Revisão
+      description: "Redigir abertura do capítulo"
+      agent: synthesis-writer
+      action: write_intro
+      prompt: |
+        Escreva a introdução da revisão:
+        1. Apresente o escopo da revisão
+        2. Explique a estrutura do capítulo
+        3. Indique os critérios de seleção da literatura
+        4. Conecte com a pergunta de pesquisa
+      input:
+        - review_outline
+      output:
+        - intro_draft
+
+    - id: write-sections
+      name: Escrever Seções Temáticas
+      description: "Redigir corpo da revisão"
+      agent: synthesis-writer
+      action: write_sections
+      repeat: true
+      max_iterations: 5
+      prompt: |
+        Para cada seção do outline:
+        1. Escreva síntese integrativa (não resumos sequenciais)
+        2. Conecte autores que tratam do mesmo tema
+        3. Identifique convergências e divergências
+        4. Mantenha voz crítica/analítica
+        5. Use transições suaves entre parágrafos
+        
+        Lembre: tema lidera, não autores.
+      input:
+        - review_outline
+      output:
+        - section_drafts
+
+    - id: write-synthesis
+      name: Escrever Síntese Final
+      description: "Consolidar achados da revisão"
+      agent: synthesis-writer
+      action: write_synthesis
+      prompt: |
+        Escreva a síntese final da revisão:
+        1. Principais achados consolidados
+        2. Estado atual do conhecimento
+        3. Lacunas identificadas
+        4. Como isso fundamenta sua pesquisa
+      input:
+        - section_drafts
+      output:
+        - synthesis_draft
+
+    - id: review-coherence
+      name: Revisar Coerência
+      description: "Verificar fluxo e consistência"
+      agent: academic-writer
+      action: review_coherence
+      prompt: |
+        Revise o texto quanto a:
+        1. Coerência entre seções
+        2. Transições adequadas
+        3. Evitar repetições
+        4. Voz consistente
+        5. Citações bem integradas
+      input:
+        - intro_draft
+        - section_drafts
+        - synthesis_draft
+      output:
+        - coherence_review
+
+    - id: compile-review
+      name: Compilar Revisão
+      description: "Montar documento final"
+      agent: synthesis-writer
+      action: compile_review
+      input:
+        - intro_draft
+        - section_drafts
+        - synthesis_draft
+        - coherence_review
+      output:
+        - review_document
+
+  outputs:
+    - name: review_document
+      path: "_adks/_docs/02-literature/literature-review.md"
+      format: md
+    - name: review_data
+      path: "_adks/_memory/literature-review.yaml"
+      format: yaml
+
+  next_workflows:
+    - design-method
+    - write-section
+
+  tags:
+    - phase-2
+    - literature
+    - writing
+    - synthesis
+    - review

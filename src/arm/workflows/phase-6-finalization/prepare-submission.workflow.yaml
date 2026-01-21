@@ -1,0 +1,160 @@
+workflow:
+  id: prepare-submission
+  name: Preparação para Submissão
+  version: "1.0.0"
+  module: arm
+  phase: 6
+  description: |
+    Workflow final para preparar e realizar submissão.
+    Organiza materiais e guia o processo de submissão
+    ao periódico, programa ou conferência.
+  
+  lead_agent: project-planner
+  supporting_agents:
+    - latex-specialist
+    - academic-writer
+  
+  input_file_patterns:
+    - pattern: "_adks/_docs/06-final/*"
+      description: "Documentos finais"
+      required: true
+    - pattern: "_adks/_memory/quality-checklist.yaml"
+      description: "Resultado do checklist"
+      required: false
+  
+  sharded: false
+  
+  steps:
+    - id: verify-readiness
+      name: Verificar Prontidão
+      description: "Confirmar que documento está pronto"
+      agent: project-planner
+      action: verify_readiness
+      prompt: |
+        Verifique a prontidão para submissão:
+        1. Checklist de qualidade aprovado?
+        2. Todos os coautores revisaram?
+        3. Orientador aprovou (se aplicável)?
+        4. Documento está finalizado?
+        
+        Se não estiver pronto, identifique pendências.
+      output:
+        - readiness_status
+        - pending_items
+
+    - id: identify-submission-info
+      name: Identificar Informações de Submissão
+      description: "Coletar dados do destino"
+      agent: project-planner
+      action: identify_submission
+      prompt: |
+        Identifique informações de submissão:
+        1. Nome do periódico/conferência/programa
+        2. URL do sistema de submissão
+        3. Prazo de submissão
+        4. Taxa de submissão (se houver)
+        5. Requisitos específicos
+      output:
+        - submission_info
+
+    - id: prepare-cover-letter
+      name: Preparar Carta de Apresentação
+      description: "Redigir cover letter"
+      agent: academic-writer
+      action: prepare_cover_letter
+      prompt: |
+        Redija carta de apresentação:
+        1. Dirigida ao editor
+        2. Título do artigo
+        3. Breve descrição da contribuição
+        4. Por que é adequado para o periódico
+        5. Declarações necessárias
+        6. Informações de contato
+      input:
+        - submission_info
+      output:
+        - cover_letter
+      optional: true
+
+    - id: prepare-supplementary
+      name: Preparar Materiais Suplementares
+      description: "Organizar anexos e suplementos"
+      agent: project-planner
+      action: prepare_supplementary
+      prompt: |
+        Organize materiais suplementares:
+        1. Dados brutos (se compartilhados)
+        2. Materiais adicionais
+        3. Apêndices
+        4. Declarações de ética
+        5. Autorizações necessárias
+      output:
+        - supplementary_materials
+      optional: true
+
+    - id: check-file-formats
+      name: Verificar Formatos
+      description: "Confirmar formatos de arquivo"
+      agent: latex-specialist
+      action: check_formats
+      prompt: |
+        Verifique os formatos de arquivo:
+        1. Documento principal no formato correto?
+        2. Figuras em formato aceito?
+        3. Tabelas em formato aceito?
+        4. Suplementares no formato correto?
+        5. Tamanho dos arquivos adequado?
+      input:
+        - submission_info
+      output:
+        - format_verification
+
+    - id: create-submission-checklist
+      name: Criar Checklist de Submissão
+      description: "Lista final para submissão"
+      agent: project-planner
+      action: create_checklist
+      prompt: |
+        Crie checklist de submissão:
+        - [ ] Documento principal
+        - [ ] Carta de apresentação
+        - [ ] Figuras separadas (se requerido)
+        - [ ] Tabelas separadas (se requerido)
+        - [ ] Materiais suplementares
+        - [ ] Informações de autores
+        - [ ] Palavras-chave
+        - [ ] Área temática
+        - [ ] Declarações necessárias
+      output:
+        - submission_checklist
+
+    - id: document-submission
+      name: Documentar Submissão
+      description: "Registrar dados da submissão"
+      agent: project-planner
+      action: document_submission
+      prompt: |
+        Após a submissão, documente:
+        1. Data e hora da submissão
+        2. Número/ID da submissão
+        3. Confirmação recebida?
+        4. Prazo esperado de resposta
+        5. Próximos passos
+      input:
+        - submission_info
+        - submission_checklist
+      output:
+        - submission_record
+
+  outputs:
+    - submission_package
+    - submission_record
+
+  next_workflows: []
+
+  tags:
+    - phase-6
+    - finalization
+    - submission
+    - publication
+    - final

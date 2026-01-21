@@ -1,0 +1,164 @@
+workflow:
+  id: write-section
+  name: Escrita de Seção do Artigo
+  version: "1.0.0"
+  module: arm
+  phase: 4
+  description: |
+    Workflow para escrever uma seção específica do artigo.
+    Guia o processo de rascunho, revisão e refinamento
+    de cada parte do documento.
+  
+  lead_agent: academic-writer
+  supporting_agents:
+    - structure-designer
+    - style-guardian
+  
+  input_file_patterns:
+    - pattern: "_adks/_memory/document-structure.yaml"
+      description: "Estrutura do documento"
+      required: false
+    - pattern: "_adks/_docs/**/*.md"
+      description: "Documentos de apoio"
+      required: false
+  
+  sharded: true
+  shard_by: section
+  
+  steps:
+    - id: identify-section
+      name: Identificar Seção
+      description: "Determinar qual seção será escrita"
+      agent: academic-writer
+      action: identify_section
+      prompt: |
+        Identifique a seção a ser escrita:
+        1. Qual seção? (Introdução, Metodologia, Resultados, etc.)
+        2. O que já existe dessa seção?
+        3. Quais são os requisitos específicos?
+        4. Que materiais de apoio estão disponíveis?
+      output:
+        - section_name
+        - section_requirements
+        - available_materials
+
+    - id: review-outline
+      name: Revisar Outline da Seção
+      description: "Confirmar estrutura da seção"
+      agent: academic-writer
+      action: review_outline
+      prompt: |
+        Revise o outline da seção:
+        1. Quais subseções/tópicos incluir?
+        2. Em que ordem?
+        3. Qual o tamanho esperado de cada parte?
+        4. Há requisitos específicos do periódico?
+      input:
+        - section_name
+      output:
+        - section_outline
+
+    - id: gather-content
+      name: Reunir Conteúdo
+      description: "Coletar informações para a seção"
+      agent: academic-writer
+      action: gather_content
+      prompt: |
+        Reúna o conteúdo necessário:
+        1. Dados/informações da memória do projeto
+        2. Referências relevantes
+        3. Notas e rascunhos existentes
+        4. Figuras/tabelas a incluir
+      input:
+        - section_outline
+        - available_materials
+      output:
+        - content_gathered
+
+    - id: write-draft
+      name: Escrever Rascunho
+      description: "Redigir primeira versão"
+      agent: academic-writer
+      action: write_draft
+      prompt: |
+        Escreva o rascunho da seção:
+        1. Siga o outline definido
+        2. Foque em completar o conteúdo
+        3. Não se preocupe com perfeição ainda
+        4. Marque pontos que precisam de mais trabalho
+        
+        Princípios:
+        - Uma ideia por parágrafo
+        - Tópico frasal no início
+        - Transições entre parágrafos
+      input:
+        - section_outline
+        - content_gathered
+      output:
+        - draft_text
+
+    - id: self-review
+      name: Auto-Revisão
+      description: "Revisar o próprio rascunho"
+      agent: academic-writer
+      action: self_review
+      prompt: |
+        Revise o rascunho quanto a:
+        1. Clareza das ideias
+        2. Completude do conteúdo
+        3. Fluxo lógico
+        4. Coerência com o resto do documento
+        
+        Identifique pontos a melhorar.
+      input:
+        - draft_text
+      output:
+        - review_notes
+        - improved_draft
+
+    - id: style-check
+      name: Verificar Estilo
+      description: "Revisar estilo e tom"
+      agent: style-guardian
+      action: check_style
+      prompt: |
+        Verifique o estilo do texto:
+        1. Tom acadêmico adequado?
+        2. Terminologia consistente?
+        3. Concisão (sem verbosidade)?
+        4. Voz apropriada (ativa/passiva)?
+      input:
+        - improved_draft
+      output:
+        - style_suggestions
+      optional: true
+
+    - id: finalize-section
+      name: Finalizar Seção
+      description: "Incorporar revisões e finalizar"
+      agent: academic-writer
+      action: finalize_section
+      input:
+        - improved_draft
+        - style_suggestions
+      output:
+        - final_section
+
+  outputs:
+    - name: final_section
+      path: "_adks/_docs/04-writing/sections/{section_name}.md"
+      format: md
+    - name: section_metadata
+      path: "_adks/_memory/sections/{section_name}.yaml"
+      format: yaml
+
+  next_workflows:
+    - write-section
+    - improve-text
+    - review-logic
+
+  tags:
+    - phase-4
+    - writing
+    - section
+    - drafting
